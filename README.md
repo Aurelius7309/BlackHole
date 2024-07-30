@@ -1,1 +1,1 @@
-"# Black Hole - Accessibility/Screenreader mod for Balatro" 
+# Black Hole - Accessibility/Screenreader mod for Balatro
