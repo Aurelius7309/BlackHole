@@ -1,0 +1,36 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# G.UIDEF.card_h_popup()
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = "local card_type = localize('k_'..string.lower(AUT.card_type))"
+position = "after"
+payload = """
+tts.silence()
+if AUT.name[1].config.object then
+    tts.say(AUT.name[1].config.object.string)
+else
+    local name_text = ''
+    for _, v in ipairs(AUT.name) do
+        if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
+    end
+    tts.say(name_text)
+end
+local desc_text = ''
+for _, v in ipairs(AUT.main) do
+    for _, vv in ipairs(v) do
+        if vv.config and type(vv.config.text) == 'string' then
+            desc_text = desc_text..vv.config.text
+        elseif vv.nodes and vv.nodes[1] and vv.nodes[1].config and type(vv.nodes[1].config.text) == 'string' then
+            desc_text = desc_text..vv.nodes[1].config.text
+        end
+    end
+    desc_text = desc_text..' '
+end
+tts.say(desc_text)
+"""
+match_indent = true
