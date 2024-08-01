@@ -2,7 +2,7 @@
 local os=love.system.getOS()
 if os =="Windows" then
     backend = SMODS.load_file('Love2talk/tolk.lua')()
-    --backend.trySAPI(true)
+    backend.trySAPI(true)
 elseif os=="OS X" then
     backend = SMODS.load_file('Love2talk/macspeech.lua')()
 end
