@@ -6,5 +6,4 @@
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
 
 tts = SMODS.load_file('Love2talk/Love2talk.lua')()
-tts.silence()
 tts.say('Hello Balatro! Using Black Hole, version 1.0.0a')

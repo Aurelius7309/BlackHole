@@ -3,6 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+## Handle Card Info
 # G.UIDEF.card_h_popup()
 [[patches]]
 [patches.pattern]
@@ -35,32 +36,7 @@ tts.say(desc_text)
 """
 match_indent = true
 
-# Handle button hovering
-[[patches]]
-[patches.pattern]
-target = "engine/controller.lua"
-pattern = "self.hovering.target:hover()"
-position = "before"
-payload = """
-local but_text = ''
-local function find_strings(target)
-    for _, v in ipairs(target.children or {}) do
-        if v.config and type(v.config.text) == 'string' then
-            but_text = but_text..v.config.text..' '
-        else
-            find_strings(v)
-        end
-    end
-end
-find_strings(self.hovering.target)
-if but_text ~= '' then 
-    tts.silence()
-    tts.say(but_text)
-end
-"""
-match_indent = true
-
-# new_round()
+# G.UIDEF.card_h_popup()
 [[patches]]
 [patches.regex]
 target = 'functions/UI_definitions.lua'
@@ -98,3 +74,28 @@ for _, v in ipairs(AUT.info) do
     tts.say(tooltip_desc_text)
 end
 '''
+
+## Handle button hovering
+[[patches]]
+[patches.pattern]
+target = "engine/controller.lua"
+pattern = "self.hovering.target:hover()"
+position = "before"
+payload = """
+local but_text = ''
+local function find_strings(target)
+    for _, v in ipairs(target.children or {}) do
+        if v.config and type(v.config.text) == 'string' then
+            but_text = but_text..v.config.text..' '
+        else
+            find_strings(v)
+        end
+    end
+end
+find_strings(self.hovering.target)
+if but_text ~= '' then 
+    tts.silence()
+    tts.say(but_text)
+end
+"""
+match_indent = true
