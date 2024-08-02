@@ -11,7 +11,7 @@ pattern = "local card_type = localize('k_'..string.lower(AUT.card_type))"
 position = "after"
 payload = """
 tts.silence()
-if AUT.name[1].config.object then
+if AUT.name and AUT.name[1].config.object then
     tts.say(AUT.name[1].config.object.string)
 else
     local name_text = ''
@@ -32,5 +32,30 @@ for _, v in ipairs(AUT.main) do
     desc_text = desc_text..' '
 end
 tts.say(desc_text)
+"""
+match_indent = true
+
+# Handle button hovering
+[[patches]]
+[patches.pattern]
+target = "engine/controller.lua"
+pattern = "self.hovering.target:hover()"
+position = "before"
+payload = """
+local but_text = ''
+local function find_strings(target)
+    for _, v in ipairs(target.children or {}) do
+        if v.config and type(v.config.text) == 'string' then
+            but_text = but_text..v.config.text..' '
+        else
+            find_strings(v)
+        end
+    end
+end
+find_strings(self.hovering.target)
+if but_text ~= '' then 
+    tts.silence()
+    tts.say(but_text)
+end
 """
 match_indent = true
