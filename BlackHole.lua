@@ -4,6 +4,121 @@
 --- PREFIX: blh
 --- MOD_AUTHOR: [Aure]
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
+--- VERSION: 0.1.0
 
+BlackHole = SMODS.current_mod
 tts = SMODS.load_file('Love2talk/Love2talk.lua')()
-tts.say('Hello Balatro! Using Black Hole, version 1.0.0a')
+G.E_MANAGER:add_event(Event{
+    func = function()
+        if SMODS.booted then
+            tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version } })
+            return true
+        end
+    end
+})
+SMODS.Keybind{
+	key = 'welcome',
+	key_pressed = '1',
+    action = function(controller)
+        tts.silence()
+        tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version }})
+    end,
+}
+SMODS.Keybind{
+	key = 'game_speed',
+	key_pressed = '2',
+    action = function(controller)
+        local sequence = {
+            [0.25] = 0.5,
+            [0.5] = 1,
+            [1] = 2,
+            [2] = 4,
+            [4] = (SMODS.Mods.nopeus or {}).can_load and 8 or 0.5,
+            [8] = 16,
+            [16] = 32,
+            [32] = 64,
+            [64] = 999,
+            [999] = 0.25,
+        }
+        G.SETTINGS.GAMESPEED = sequence[G.SETTINGS.GAMESPEED]
+        tts.silence()
+        tts.say(localize { type = 'variable', key = 'tts_game_speed', vars = { G.SETTINGS.GAMESPEED }})
+        G:save_settings()
+    end,
+}
+
+function BlackHole.process_hover(controller)
+    local node = controller.hovering.target
+    -- Do not restart speech  when the same node is hovered again
+    if BlackHole.last_tts_node == node and BlackHole.hover_time_elapsed <= 3 then return end
+    if node.tts and node.tts ~= '' then
+        tts.silence()
+        if node.facing == 'back' then 
+            node.tts = (node.highlighted and localize('tts_highlighted') or '')..localize('tts_face_down_card')
+        end
+        tts.say(node.tts)
+        BlackHole.last_tts_node = node 
+        BlackHole.hover_time_elapsed = 0
+    else
+        BlackHole.read_button(node)
+    end
+end
+
+function BlackHole.read_button(node)
+    if not node.config.button then return end
+    local but_text = ''
+    local function find_strings(target)
+        for _, v in ipairs(target.children or {}) do
+            local text_to_merge = nil
+            if v.config and type(v.config.text) == 'string' then
+                text_to_merge = ""..v.config.text
+            elseif v.config and v.config.object and v.config.object.string then
+                text_to_merge = ""..v.config.object.string
+            end
+            if text_to_merge then
+                if text_to_merge:match('^%$+%+$') then
+                    text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                end
+                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                but_text = but_text..text_to_merge..' '
+            else
+                find_strings(v)
+            end
+        end
+    end
+    find_strings(node)
+    local is_blind_select_button = false
+    for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
+        if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
+    end
+    if is_blind_select_button then
+        but_text = ''
+        find_strings(node.parent.parent.parent)
+    end
+    local is_play_hand = but_text == localize('b_play_hand')..' '
+    local is_discard =  but_text == localize('b_discard')..' '
+    if (is_play_hand or is_discard) then
+        if is_play_hand and G.boss_throw_hand then
+            but_text = but_text.. " - " .. localize('ph_unscored_hand') .. G.GAME.blind:get_loc_debuff_text() .. " - "
+        end
+        local text,disp_text = G.FUNCS.get_poker_hand_info(G.hand.highlighted)
+        local hand = G.GAME.hands[text]
+        but_text = but_text .. localize {
+            type = 'variable',
+            key = 'tts_hand_eval',
+            vars = { disp_text, hand.level, hand.chips, hand.mult }
+        }
+        if is_play_hand then
+            but_text = but_text .. localize {
+                type = 'variable',
+                key = 'tts_played_this_run',
+                vars = { hand.played, localize('tts_time'..(hand.played ~= 1 and 's' or '')) }
+            }
+        end
+    end
+    if but_text ~= '' then 
+        tts.silence()
+        tts.say(but_text)
+        BlackHole.last_tts_node = node
+    end
+end

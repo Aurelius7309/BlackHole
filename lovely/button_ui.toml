@@ -8,42 +8,13 @@ priority = 0
 [patches.pattern]
 target = "engine/controller.lua"
 pattern = "self.hovering.target:hover()"
+position = "after"
+payload = """BlackHole.process_hover(self)"""
+match_indent = true
+[[patches]]
+[patches.pattern]
+target = "engine/controller.lua"
+pattern = "if self.hovering.target then"
 position = "before"
-payload = """
-G.E_MANAGER:add_event(Event({
-    trigger = 'immediate',
-    func = function()
-        local but_text = ''
-        local function find_strings(target)
-            for _, v in ipairs(target.children or {}) do
-                local text_to_merge = nil
-                if v.config and type(v.config.text) == 'string' then
-                    text_to_merge = ""..v.config.text
-                elseif v.config and v.config.object and v.config.object.string then
-                    text_to_merge = ""..v.config.object.string
-                end
-
-                if text_to_merge then
-                    but_text = but_text..text_to_merge..' '
-                else
-                    find_strings(v)
-                end
-            end
-        end
-        find_strings(self.hovering.target)
-        local is_blind_select_button = false
-        for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
-            if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
-        end
-        if is_blind_select_button then
-            but_text = ''
-            find_strings(self.hovering.target.parent.parent)
-        end
-        if but_text ~= '' then 
-            tts.silence()
-            tts.say(but_text)
-        end
-    return true end 
-}))
-"""
+payload = """BlackHole.hover_time_elapsed = (BlackHole.hover_time_elapsed or 0) + dt"""
 match_indent = true
