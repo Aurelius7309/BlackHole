@@ -74,38 +74,3 @@ for _, v in ipairs(AUT.info) do
     tts.say(tooltip_desc_text)
 end
 '''
-
-## Handle button hovering
-[[patches]]
-[patches.pattern]
-target = "engine/controller.lua"
-pattern = "self.hovering.target:hover()"
-position = "before"
-payload = """
-local but_text = ''
-local function find_strings(target)
-    for _, v in ipairs(target.children or {}) do
-        if v.config and type(v.config.text) == 'string' then
-            but_text = but_text..v.config.text..' '
-        elseif v.config and v.config.object and v.config.object.string then
-            but_text = but_text..v.config.object.string..' '
-        else
-            find_strings(v)
-        end
-    end
-end
-find_strings(self.hovering.target)
-local is_blind_select_button = false
-for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
-    if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
-end
-if is_blind_select_button then
-    but_text = ''
-    find_strings(self.hovering.target.parent.parent)
-end
-if but_text ~= '' then 
-    tts.silence()
-    tts.say(but_text)
-end
-"""
-match_indent = true
