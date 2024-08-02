@@ -61,12 +61,43 @@ function BlackHole.process_hover(controller)
         BlackHole.hover_time_elapsed = 0
     else
         BlackHole.read_button(node)
+        if node.config.h_popup then BlackHole.read_h_popup(node.config.h_popup, node) end
+    end
+end
+
+function BlackHole.read_h_popup(popup, node)
+    local popup_text = ''
+    local function find_strings(target)
+        for _, v in ipairs(target.nodes or {}) do
+            local text_to_merge = nil
+            if v.config and type(v.config.text) == 'string' then
+                text_to_merge = ""..v.config.text
+            elseif v.config and v.config.object and v.config.object.string then
+                text_to_merge = ""..v.config.object.string
+            end
+            if text_to_merge then
+                if text_to_merge:match('^%$+%+$') then --TODO: Update check to work
+                    text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                end
+                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                popup_text = popup_text..text_to_merge..' '
+            else
+                find_strings(v)
+            end
+        end
+    end
+    find_strings(popup)
+    if popup_text ~= '' then 
+        tts.silence()
+        tts.say(popup_text)
+        BlackHole.last_tts_node = node
     end
 end
 
 function BlackHole.read_button(node)
     if not node.config.button then return end
     local but_text = ''
+    -- Should we just make this a generic function? It's used quite often for reading UI nodes
     local function find_strings(target)
         for _, v in ipairs(target.children or {}) do
             local text_to_merge = nil

@@ -57,7 +57,6 @@ position = 'before'
 line_prepend = '$indent'
 payload = ''' 
 -- Badges
--- Note: make more advanced version that groups badge names with tooltips if they match. 
 for i, v in ipairs(badges) do
     local badge_name = v.nodes[1].nodes[2].config.object.string
 
@@ -71,17 +70,28 @@ for _, v in ipairs(AUT.info) do
 
     -- Tooltip Desc
     local tooltip_desc_text = ""
-    for _, vv in ipairs(v) do 
-        for _, vvv in ipairs(vv) do 
-            if vvv.config and type(vvv.config.text) == 'string' then
-                tooltip_desc_text = tooltip_desc_text..vvv.config.text
-            elseif vvv.nodes and vvv.nodes[1] and vvv.nodes[1].config and type(vvv.nodes[1].config.text) == 'string' then
-                tooltip_desc_text = tooltip_desc_text..vvv.nodes[1].config.text
+    local function find_strings(target)
+        for _, v in ipairs(target or {}) do
+            local text_to_merge = nil
+            if v.config and type(v.config.text) == 'string' then
+                text_to_merge = ""..v.config.text
+            elseif v.config and v.config.object and v.config.object.string then
+                text_to_merge = ""..v.config.object.string
+            end
+            if text_to_merge then
+                if text_to_merge:match('^%$+%+$') then
+                    text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                end
+                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                tooltip_desc_text = tooltip_desc_text..text_to_merge..' '
+            else
+                find_strings(v)
             end
         end
-        tooltip_desc_text = tooltip_desc_text.." "
     end
-    
+    find_strings(v)
+
+
     card.tts = card.tts..tooltip_desc_text .. ' - '
 end
 '''
