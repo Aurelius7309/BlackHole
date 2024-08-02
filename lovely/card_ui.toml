@@ -3,6 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+## Handle Card Info
 # G.UIDEF.card_h_popup()
 [[patches]]
 [patches.pattern]
@@ -35,7 +36,46 @@ tts.say(desc_text)
 """
 match_indent = true
 
-# Handle button hovering
+# G.UIDEF.card_h_popup()
+[[patches]]
+[patches.regex]
+target = 'functions/UI_definitions.lua'
+pattern = '''(?<indent>[\t ]*)return \{n=G\.UIT\.ROOT, config = \{align = 'cm', colour = G\.C\.CLEAR\}, nodes=\{\n[\s\S]{8}\{n=G\.UIT\.C'''
+position = 'before'
+line_prepend = '$indent'
+payload = ''' 
+-- Badges
+-- Note: make more advanced version that groups badge names with tooltips if they match. 
+for i, v in ipairs(badges) do
+    local badge_name = v.nodes[1].nodes[2].config.object.string
+
+    tts.say(badge_name)
+end
+
+-- Tooltips
+for _, v in ipairs(AUT.info) do
+    -- Tooltip name
+    local tooltip_name = v.name
+    tts.say(tooltip_name)
+
+    -- Tooltip Desc
+    local tooltip_desc_text = ""
+    for _, vv in ipairs(v) do 
+        for _, vvv in ipairs(vv) do 
+            if vvv.config and type(vvv.config.text) == 'string' then
+                tooltip_desc_text = tooltip_desc_text..vvv.config.text
+            elseif vvv.nodes and vvv.nodes[1] and vvv.nodes[1].config and type(vvv.nodes[1].config.text) == 'string' then
+                tooltip_desc_text = tooltip_desc_text..vvv.nodes[1].config.text
+            end
+        end
+        tooltip_desc_text = tooltip_desc_text.." "
+    end
+    
+    tts.say(tooltip_desc_text)
+end
+'''
+
+## Handle button hovering
 [[patches]]
 [patches.pattern]
 target = "engine/controller.lua"
