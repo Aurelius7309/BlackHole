@@ -49,6 +49,7 @@ SMODS.Keybind{
 
 function BlackHole.process_hover(controller)
     local node = controller.hovering.target
+    if BlackHole.hover_suppressed then return end
     -- Do not restart speech  when the same node is hovered again
     if BlackHole.last_tts_node == node and BlackHole.hover_time_elapsed <= 3 then return end
     if node.tts and node.tts ~= '' then
@@ -76,9 +77,11 @@ function BlackHole.read_h_popup(popup, node)
                 text_to_merge = ""..v.config.object.string
             end
             if text_to_merge then
-                if text_to_merge:match('^%$+%+$') then --TODO: Update check to work
-                    text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
-                end
+                if text_to_merge:match('^%$+%+?$') then
+                    local has_plus = text_to_merge:match('%+$')
+                    text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+                end 
+                --TODO this is not always what we want, compare blind reward vs. foil tooltip
                 if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
                 popup_text = popup_text..text_to_merge..' '
             else
@@ -95,7 +98,6 @@ function BlackHole.read_h_popup(popup, node)
 end
 
 function BlackHole.read_button(node)
-    if not node.config.button then return end
     local but_text = ''
     -- Should we just make this a generic function? It's used quite often for reading UI nodes
     local function find_strings(target)
@@ -107,10 +109,13 @@ function BlackHole.read_button(node)
                 text_to_merge = ""..v.config.object.string
             end
             if text_to_merge then
-                if text_to_merge:match('^%$+%+$') then
-                    text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                if text_to_merge:match('^%$+%+?$') then
+                    local has_plus = text_to_merge:match('%+$')
+                    text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
                 end
-                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+                local x_base = localize('k_x_base')
+                if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
                 but_text = but_text..text_to_merge..' '
             else
                 find_strings(v)
@@ -128,8 +133,16 @@ function BlackHole.read_button(node)
     end
     local is_play_hand = but_text == localize('b_play_hand')..' '
     local is_discard =  but_text == localize('b_discard')..' '
-    if (is_play_hand or is_discard) then
-        if is_play_hand and G.boss_throw_hand then
+    if is_play_hand or is_discard then
+        local amount = G.GAME.current_round[is_play_hand and 'hands_left' or 'discards_left']
+        but_text = but_text .. localize {
+            type = 'variable',
+            key = (is_play_hand and 'tts_hands_' or 'tts_discards_') .. (amount == 1 and 'singular' or 'plural'),
+            vars = { amount }
+        }
+    end
+    if is_play_hand and node.config.button then
+        if G.boss_throw_hand then
             but_text = but_text.. " - " .. localize('ph_unscored_hand') .. G.GAME.blind:get_loc_debuff_text() .. " - "
         end
         local text,disp_text = G.FUNCS.get_poker_hand_info(G.hand.highlighted)
@@ -139,15 +152,13 @@ function BlackHole.read_button(node)
             key = 'tts_hand_eval',
             vars = { disp_text, hand.level, hand.chips, hand.mult }
         }
-        if is_play_hand then
-            but_text = but_text .. localize {
-                type = 'variable',
-                key = 'tts_played_this_run',
-                vars = { hand.played, localize('tts_time'..(hand.played ~= 1 and 's' or '')) }
-            }
-        end
+        but_text = but_text .. localize {
+            type = 'variable',
+            key = 'tts_played_this_run',
+            vars = { hand.played, localize('tts_time'..(hand.played ~= 1 and 's' or '')) }
+        }
     end
-    if but_text ~= '' then 
+    if but_text ~= '' then
         tts.silence()
         tts.say(but_text)
         BlackHole.last_tts_node = node

@@ -1,0 +1,81 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# G.FUNCS.play_cards_from_highlighted
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "if G.play and G.play.cards[1] then return end"
+position = "after"
+payload = """local prev_chips = G.GAME.chips
+BlackHole.hover_suppressed = true"""
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "G.FUNCS.evaluate_play()"
+position = "after"
+payload = """G.E_MANAGER:add_event(Event({
+    func = function()
+        tts.silence()
+        tts.say(localize{
+            type = 'variable', 
+            key = 'tts_score_report',
+            vars = { hand_chips*mult, prev_chips+hand_chips*mult, G.GAME.blind.chips }
+        })
+        return true
+    end
+}))
+
+"""
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "G.GAME.current_round.hands_played = G.GAME.current_round.hands_played + 1"
+position = "after"
+payload = """G.E_MANAGER:add_event(Event({
+    trigger = 'after',
+    delay = 2.0*math.sqrt(G.SETTINGS.GAMESPEED),
+    blocking = false,
+    func = function()
+        BlackHole.hover_suppressed = nil
+        return true
+    end
+}))
+"""
+match_indent = true
+
+#G.FUNCS.discard_cards_from_highlighted
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+pattern = "G.GAME.round_scores.cards_discarded.amt = G.GAME.round_scores.cards_discarded.amt + #cards"
+position = "after"
+payload = """BlackHole.hover_suppressed = true
+G.E_MANAGER:add_event(Event({
+    func = function()
+        tts.silence()
+        tts.say(localize{
+            type = 'variable', 
+            key = 'tts_discarded',
+            vars = { #cards }
+        })
+        return true
+    end
+}))
+G.E_MANAGER:add_event(Event({
+    trigger = 'after',
+    delay = 2.0*math.sqrt(G.SETTINGS.GAMESPEED),
+    blocking = false,
+    func = function()
+        BlackHole.hover_suppressed = nil
+        return true
+    end
+}))
+"""
+match_indent = true
