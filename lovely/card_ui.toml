@@ -12,7 +12,6 @@ pattern = "local card_type = localize('k_'..string.lower(AUT.card_type))"
 position = "after"
 payload = """
 card.tts = ''
-if card.highlighted then card.tts = card.tts..localize('tts_highlighted') end
 if AUT.name and type(AUT.name) == 'table' then
     if AUT.name[1].config.object then
         card.tts = card.tts..AUT.name[1].config.object.string.. ' - '
@@ -24,8 +23,14 @@ if AUT.name and type(AUT.name) == 'table' then
         card.tts = card.tts .. name_text .. ' - '
     end
 end
+if card.highlighted then
+    card.tts = localize {
+        type = 'variable',
+        key = 'tts_highlighted',
+        vars = { card.tts }
+    }
+end
 local desc_text = ''
-sendInfoMessage(tostring(card.area == G.pack_cards))
 if not (card.config.card_key and card.area ~= G.shop_jokers) and not (card.area == G.pack_cards) then
     if card.cost and (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_cost", vars = {card.cost}} end
     if card.sell_cost and not (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_sell", vars = {card.sell_cost}} end

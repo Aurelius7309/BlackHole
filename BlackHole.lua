@@ -28,12 +28,14 @@ SMODS.Keybind{
 	key = 'game_speed',
 	key_pressed = '2',
     action = function(controller)
+        local nopeus = (SMODS.Mods.nopeus or {}).can_load
         local sequence = {
             [0.25] = 0.5,
             [0.5] = 1,
             [1] = 2,
-            [2] = 4,
-            [4] = (SMODS.Mods.nopeus or {}).can_load and 8 or 0.5,
+            [2] = nopeus and 3 or 4,
+            [3] = 4,
+            [4] = nopeus and 8 or 0.5,
             [8] = 16,
             [16] = 32,
             [32] = 64,
@@ -138,8 +140,8 @@ function BlackHole.read_button(node)
         local amount = G.GAME.current_round[is_play_hand and 'hands_left' or 'discards_left']
         but_text = but_text .. localize {
             type = 'variable',
-            key = (is_play_hand and 'tts_hands_' or 'tts_discards_') .. (amount == 1 and 'singular' or 'plural'),
-            vars = { amount }
+            key = 'tts_remaining',
+            vars = { amount, localize((is_play_hand and 'tts_hand' or 'tts_discard')..(amount ~= 1 and 's' or '')) }
         }
     end
     if is_play_hand and node.config.button then

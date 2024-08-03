@@ -24,7 +24,7 @@ payload = """G.E_MANAGER:add_event(Event({
         tts.say(localize{
             type = 'variable', 
             key = 'tts_score_report',
-            vars = { hand_chips*mult, prev_chips+hand_chips*mult, G.GAME.blind.chips }
+            vars = { number_format(hand_chips*mult), number_format(prev_chips+hand_chips*mult), number_format(G.GAME.blind.chips) }
         })
         return true
     end
@@ -63,7 +63,7 @@ G.E_MANAGER:add_event(Event({
         tts.say(localize{
             type = 'variable', 
             key = 'tts_discarded',
-            vars = { #cards }
+            vars = { #cards, localize('tts_card'..(#cards ~= 1 and 's' or '')) }
         })
         return true
     end
