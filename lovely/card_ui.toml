@@ -25,6 +25,11 @@ if AUT.name and type(AUT.name) == 'table' then
     end
 end
 local desc_text = ''
+sendInfoMessage(tostring(card.area == G.pack_cards))
+if not (card.config.card_key and card.area ~= G.shop_jokers) and not (card.area == G.pack_cards) then
+    if card.cost and (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_cost", vars = {card.cost}} end
+    if card.sell_cost and not (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_sell", vars = {card.sell_cost}} end
+end
 for _, v in ipairs(AUT.main) do
     for _, vv in ipairs(v) do
     local text_to_merge = ''

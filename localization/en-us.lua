@@ -10,7 +10,9 @@ return {
             tts_discards_singular = [[- #1# discard remaining. ]],
             tts_discards_plural = [[- #1# discards remaining. ]],
             tts_score_report = [[Scored #1# chips this hand, #2# total. #3# chips are needed to defeat the current Blind. ]],
-            tts_discarded = [[Discarded #1# cards. ]]
+            tts_discarded = [[Discarded #1# cards. ]],
+            tts_card_cost = [[Cost: $#1#. ]],
+            tts_card_sell = [[Sell: $#1#. ]],
         },
         dictionary = {
             tts_time = 'time',
