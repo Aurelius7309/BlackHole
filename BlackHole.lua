@@ -91,7 +91,7 @@ function BlackHole.read_h_popup(popup, node)
     end
     find_strings(popup)
     if popup_text ~= '' then 
-        tts.silence()
+        --tts.silence()
         tts.say(popup_text)
         BlackHole.last_tts_node = node
     end
@@ -100,6 +100,7 @@ end
 function BlackHole.read_button(node)
     local but_text = ''
     -- Should we just make this a generic function? It's used quite often for reading UI nodes
+    -- If we were we'd need to consider an "extra args" function to handle additional text manip such as $ symbol concentration
     local function find_strings(target)
         for _, v in ipairs(target.children or {}) do
             local text_to_merge = nil
@@ -156,6 +157,20 @@ function BlackHole.read_button(node)
             type = 'variable',
             key = 'tts_played_this_run',
             vars = { hand.played, localize('tts_time'..(hand.played ~= 1 and 's' or '')) }
+        }
+    end
+    local is_poker_hand_button = (node.config.on_demand_tooltip and G.GAME.hands[node.config.on_demand_tooltip.filler.args]) and true or nil
+    if is_poker_hand_button then
+        local poker_hand_info = G.GAME.hands[node.config.on_demand_tooltip.filler.args]
+        but_text = localize {
+            type = 'variable',
+            key = 'tts_hand_eval',
+            vars = { localize(node.config.on_demand_tooltip.filler.args, 'poker_hands'), poker_hand_info.level, poker_hand_info.chips, poker_hand_info.mult }
+        }
+        but_text = but_text .. localize {
+            type = 'variable',
+            key = 'tts_played_this_run',
+            vars = { poker_hand_info.played, localize('tts_time'..(poker_hand_info.played ~= 1 and 's' or '')) }
         }
     end
     if but_text ~= '' then
