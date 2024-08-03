@@ -1,0 +1,43 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.regex]
+target = "main.lua"
+pattern = '''if not _RELEASE_MODE and G.keybind_mapping\[key\] then love.gamepadpressed'''
+position = "at"
+payload = """if BlackHole.awaiting_keypress then
+    tts.silence()
+    if BlackHole.reserved_keys[key] then
+        tts.say(localize{
+            type = 'variable',
+            key = 'tts_invalid_key',
+            vars = {key},
+        })
+    else
+        tts.say(localize{
+            type = 'variable',
+            key = 'tts_config_keybind',
+            vars = {localize(BlackHole.selected_keybind, 'tts_keybinds'), key},
+        })
+        BlackHole.awaiting_keypress = nil
+        BlackHole.cancel_release = true
+        BlackHole.config.keybinds[BlackHole.selected_keybind] = key
+        BlackHole:save_config()
+    end
+    return
+end
+if BlackHole.config.keyboard_controller and G.keybind_mapping[key] then love.gamepadpressed"""
+
+[[patches]]
+[patches.regex]
+target = "main.lua"
+pattern = '''if not _RELEASE_MODE and G.keybind_mapping\[key\] then love.gamepadreleased'''
+position = "at"
+payload = """if BlackHole.awaiting_keypress or BlackHole.cancel_release then
+    BlackHole.cancel_release = nil
+    return
+end
+if BlackHole.config.keyboard_controller and G.keybind_mapping[key] then love.gamepadreleased"""

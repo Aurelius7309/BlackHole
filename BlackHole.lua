@@ -7,6 +7,14 @@
 --- VERSION: 0.1.0
 
 BlackHole = SMODS.current_mod
+BlackHole.save_config = function(self)
+    SMODS.save_mod_config(self)
+    G.keybind_mapping = {}
+    -- Setup keyboard emulation
+    for k, v in pairs(self.config.keybinds) do G.keybind_mapping[v] = k end
+    function G.CONTROLLER.keyboard_controller.setVibration() end
+end
+
 tts = SMODS.load_file('Love2talk/Love2talk.lua')()
 G.E_MANAGER:add_event(Event{
     func = function()
@@ -16,6 +24,25 @@ G.E_MANAGER:add_event(Event{
         end
     end
 })
+local keybind_list = {
+    'dpleft',
+    'dpright',
+    'dpup',
+    'dpdown',
+    'x',
+    'y',
+    'a',
+    'b',
+    'start',
+    'triggerleft',
+    'triggerright',
+    'leftshoulder',
+    'rightshoulder',
+}
+BlackHole.keybind_lookup = {}
+for i = 1, #keybind_list do
+    BlackHole.keybind_lookup[keybind_list[i]] = keybind_list[i == #keybind_list and 1 or i+1]
+end
 SMODS.Keybind{
 	key = 'welcome',
 	key_pressed = '1',
@@ -48,6 +75,60 @@ SMODS.Keybind{
         G:save_settings()
     end,
 }
+SMODS.Keybind{
+    key = 'kc_setup',
+    key_pressed = '3',
+    action = function(controller)
+        tts.silence()
+        tts.say(localize('tts_kc_'..(BlackHole.config.keyboard_controller and 'on' or 'off')))
+    end
+}
+SMODS.Keybind{
+    key = 'kc_toggle',
+    key_pressed = '4',
+    action = function(controller)
+        BlackHole.config.keyboard_controller = not BlackHole.config.keyboard_controller
+        BlackHole:save_config()
+        tts.silence()
+        tts.say(localize('tts_kc_'..(BlackHole.config.keyboard_controller and 'on' or 'off')))
+    end
+}
+SMODS.Keybind{
+    key = 'kc_info',
+    key_pressed = '5',
+    action = function(controller)
+        if not BlackHole.config.keyboard_controller then return end
+        if BlackHole.selected_keybind then
+            BlackHole.selected_keybind = BlackHole.keybind_lookup[BlackHole.selected_keybind]
+        else
+            BlackHole.selected_keybind = keybind_list[1]
+        end
+        tts.silence()
+        tts.say(localize {
+            type = 'variable',
+            key = 'tts_config_keybind',
+            vars = { localize(BlackHole.selected_keybind, 'tts_keybinds'), BlackHole.config.keybinds[BlackHole.selected_keybind] }
+        })
+    end
+}
+
+SMODS.Keybind{
+    key = 'kc_change',
+    key_pressed = '6',
+    action = function(controller)
+        if not BlackHole.selected_keybind then return end
+        BlackHole.awaiting_keypress = BlackHole.selected_keybind
+        tts.silence()
+        tts.say(localize {
+            type = 'variable',
+            key = 'tts_assign_keybind',
+            vars = { localize(BlackHole.selected_keybind, 'tts_keybinds') }
+        })
+    end
+}
+
+BlackHole.reserved_keys = {}
+for i = 1, 6 do BlackHole.reserved_keys[''..i] = true end
 
 function BlackHole.process_hover(controller)
     local node = controller.hovering.target

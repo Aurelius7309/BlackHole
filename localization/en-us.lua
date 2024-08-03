@@ -1,7 +1,10 @@
 return {
     misc = {
         v_dictionary = {
-            tts_welcome = [[Welcome to Balatro! Using Black Hole, version #1#. Press 1 to read this message again. Press 2 to change the game speed. ]],
+            tts_welcome = [[Welcome to Balatro! Using Black Hole, version #1#. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
+            tts_config_keybind = [[The keybind for #1# is set to #2# ... Press 6 to assign a new key. Press 5 to configure the next keybind. ]],
+            tts_assign_keybind = [[Please press the key to bind to #1#. ]],
+            tts_invalid_key = [[Key #1# is reserved for Black Hole configuration. Please enter a different key. ]],
             tts_game_speed = [[Changed the game speed to #1#. ]],
             tts_highlighted = [[Selected #1#]],
             tts_hand_eval = [[#1#, level #2#. #3# X #4# ]],
@@ -25,6 +28,23 @@ return {
             tts_cards = 'cards',
             tts_face_down_card = ' Face-down card',
             tts_blind_defeated = [[Blind defeated. ]],
+            tts_kc_off = [[The keyboard controller is disabled. Press 4 to enable it. ]],
+            tts_kc_on = [[The keyboard controller is enabled. Press 4 to disable it. Press 5 to customize keybinds. ]],
+        },
+        tts_keybinds = {
+            dpleft = 'D-Pad left',
+            dpright = 'D-Pad right',
+            dpup = 'D-Pad up',
+            dpdown = 'D-Pad down',
+            x = 'Button X',
+            y = 'Button Y',
+            a = 'Button A',
+            b = 'Button B',
+            start = 'Start',
+            triggerleft = 'Left Trigger',
+            triggerright = 'Right Trigger',
+            leftshoulder = 'Left Shoulder',
+            rightshoulder = 'Right Shoulder',
         }
     }
 }
