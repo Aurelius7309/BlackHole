@@ -14,6 +14,7 @@ BlackHole.save_config = function(self)
     for k, v in pairs(self.config.keybinds) do G.keybind_mapping[v] = k end
     function G.CONTROLLER.keyboard_controller.setVibration() end
 end
+BlackHole:save_config()
 
 tts = SMODS.load_file('Love2talk/Love2talk.lua')()
 G.E_MANAGER:add_event(Event{

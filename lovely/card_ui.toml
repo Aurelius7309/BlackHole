@@ -33,8 +33,9 @@ end
 local desc_text = ''
 if not (card.config.card_key and card.area ~= G.shop_jokers) and not (card.area == G.pack_cards) then
     desc_text = desc_text..localize { type = 'variable', key = 'tts_current_money', vars = { G.GAME.dollars } }
-    if card.cost and (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_cost", vars = {card.cost}} end
-    if card.sell_cost and not (card.area == G.shop_jokers or card.area == G.shop_booster) then desc_text = desc_text..localize{type = "variable", key = "tts_card_sell", vars = {card.sell_cost}} end
+    local shop_areas = { [G.shop_jokers] = true, [G.shop_booster] = true, [G.shop_vouchers] = true }
+    if card.cost and shop_areas[card.area] then desc_text = desc_text..localize{type = "variable", key = "tts_card_cost", vars = {card.cost}} end
+    if card.sell_cost and not shop_areas[card.area] then desc_text = desc_text..localize{type = "variable", key = "tts_card_sell", vars = {card.sell_cost}} end
 end
 for _, v in ipairs(AUT.main) do
     for _, vv in ipairs(v) do
