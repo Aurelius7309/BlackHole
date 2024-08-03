@@ -24,8 +24,17 @@ payload = """G.E_MANAGER:add_event(Event({
         tts.say(localize{
             type = 'variable', 
             key = 'tts_score_report',
-            vars = { number_format(hand_chips*mult), number_format(prev_chips+hand_chips*mult), number_format(G.GAME.blind.chips) }
+            vars = { number_format(hand_chips*mult), number_format(prev_chips+hand_chips*mult) }
         })
+        if prev_chips+hand_chips*mult >= G.GAME.blind.chips then
+            tts.say(localize('tts_blind_defeated'))
+        else
+            tts.say(localize{
+                type = 'variable',
+                key = 'tts_required_score',
+                vars = { number_format(G.GAME.blind.chips) }
+            })
+        end
         return true
     end
 }))

@@ -7,7 +7,8 @@ return {
             tts_hand_eval = [[#1#, level #2#. #3# X #4# ]],
             tts_played_this_run = [[(played #1# #2# this run). ]],
             tts_remaining = [[- #1# #2# remaining. ]],
-            tts_score_report = [[Scored #1# chips this hand, #2# total. #3# chips are needed to defeat the current Blind. ]],
+            tts_score_report = [[Scored #1# chips this hand, #2# total. ]],
+            tts_required_score = [[#1# chips are needed to defeat the current Blind. ]],
             tts_discarded = [[Discarded #1# #2#. ]],
             tts_card_cost = [[Cost: $#1#. ]],
             tts_card_sell = [[Sell: $#1#. ]],
@@ -23,6 +24,7 @@ return {
             tts_card = 'card',
             tts_cards = 'cards',
             tts_face_down_card = ' Face-down card',
+            tts_blind_defeated = [[Blind defeated. ]],
         }
     }
 }

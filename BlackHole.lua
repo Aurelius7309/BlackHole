@@ -54,10 +54,19 @@ function BlackHole.process_hover(controller)
     if BlackHole.hover_suppressed then return end
     -- Do not restart speech  when the same node is hovered again
     if BlackHole.last_tts_node == node and BlackHole.hover_time_elapsed <= 3 then return end
+    if node:is(Card) and node.area == G.deck then
+         --ugly
+            node.tts = localize('k_view')..' '..localize('k_deck')
+    end
     if node.tts and node.tts ~= '' then
-        tts.silence()
-        if node.facing == 'back' then 
-            node.tts = (node.highlighted and localize('tts_highlighted') or '')..localize('tts_face_down_card')
+        tts.silence() 
+        if node.area ~= G.deck and node.facing == 'back' then 
+            node.tts = node.highlighted and localize({
+                    type = 'variable',
+                    key = 'tts_highlighted',
+                    vars = localize('tts_face_down_card')
+                }) or
+                localize('tts_face_down_card')
         end
         tts.say(node.tts)
         BlackHole.last_tts_node = node 
@@ -100,6 +109,7 @@ function BlackHole.read_h_popup(popup, node)
 end
 
 function BlackHole.read_button(node)
+    local q
     local but_text = ''
     -- Should we just make this a generic function? It's used quite often for reading UI nodes
     -- If we were we'd need to consider an "extra args" function to handle additional text manip such as $ symbol concentration
@@ -112,11 +122,11 @@ function BlackHole.read_button(node)
                 text_to_merge = ""..v.config.object.string
             end
             if text_to_merge then
-                if text_to_merge:match('^%$+%+?$') then
+                if text_to_merge:match('^%$%$+%+?$') then
                     local has_plus = text_to_merge:match('%+$')
                     text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
                 end
-                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+                if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
                 but_text = but_text..text_to_merge..' '
@@ -140,8 +150,8 @@ function BlackHole.read_button(node)
             type = 'variable',
             key = 'tts_current_money',
             vars = { G.GAME.dollars }
-        }
-        find_strings(node.parent.parent)
+        } .. but_text
+        q = true
     end
 
     local is_tab_shoulders = node.config.id == 'tab_shoulders'
@@ -193,7 +203,7 @@ function BlackHole.read_button(node)
         }
     end
     if but_text ~= '' then
-        tts.silence()
+        if not q then tts.silence() end
         tts.say(but_text)
         BlackHole.last_tts_node = node
     end
