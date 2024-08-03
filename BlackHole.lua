@@ -134,6 +134,23 @@ function BlackHole.read_button(node)
         but_text = ''
         find_strings(node.parent.parent.parent)
     end
+    local is_cashout_button = node.config.id == 'cash_out_button'
+    if is_cashout_button then
+        but_text = localize {
+            type = 'variable',
+            key = 'tts_current_money',
+            vars = { G.GAME.dollars }
+        }
+        find_strings(node.parent.parent)
+    end
+
+    local is_tab_shoulders = node.config.id == 'tab_shoulders'
+    if is_tab_shoulders then
+        but_text = ''
+        for _,v in ipairs(node.children) do
+            if v.children[1].config.chosen then find_strings(v.children[1]) end
+        end
+    end
     local is_play_hand = but_text == localize('b_play_hand')..' '
     local is_discard =  but_text == localize('b_discard')..' '
     if is_play_hand or is_discard then
