@@ -131,6 +131,38 @@ SMODS.Keybind{
 BlackHole.reserved_keys = {}
 for i = 1, 6 do BlackHole.reserved_keys[''..i] = true end
 
+-- "to_search" is table of where to start the search
+-- "target" is function returning where to start search, 
+-- "search_params" is table containing "override" (ignore base search checks) and "search" (function for custom search)
+-- "str_manip" is function for string manip after search
+function BlackHole.find_strings(t)
+    local to_search, target, search_params, str_manip = t.to_search or {}, t.target or function(to_search) return to_search end, t.search_params or {}, t.str_manip or nil
+    local final_str = ''
+    local function find_strings_recurse(to_search)
+        to_search = target(to_search) or {}
+        for _, v in ipairs(to_search) do
+            local text_to_merge = nil
+            if search_params.override then 
+                text_to_merge = ""..search_params.search(v, text_to_merge)
+            elseif v.config and type(v.config.text) == 'string' then
+                text_to_merge = ""..v.config.text
+            elseif v.config and v.config.object and v.config.object.string then
+                text_to_merge = ""..v.config.object.string
+            elseif search_params.search and type(search_params.search) == "function" then
+                text_to_merge = ""..search_params.search(v, text_to_merge)
+            end
+            if text_to_merge then
+                if str_manip and type(str_manip) == "function" then text_to_merge = str_manip(text_to_merge) end
+                final_str = final_str..text_to_merge..' '
+            else
+                find_strings_recurse(v)
+            end
+        end
+    end
+    find_strings_recurse(to_search)
+    return final_str
+end
+
 function BlackHole.process_hover(controller)
     local node = controller.hovering.target
     if BlackHole.hover_suppressed then return end
@@ -161,28 +193,17 @@ end
 
 function BlackHole.read_h_popup(popup, node)
     local popup_text = ''
-    local function find_strings(target)
-        for _, v in ipairs(target.nodes or {}) do
-            local text_to_merge = nil
-            if v.config and type(v.config.text) == 'string' then
-                text_to_merge = ""..v.config.text
-            elseif v.config and v.config.object and v.config.object.string then
-                text_to_merge = ""..v.config.object.string
-            end
-            if text_to_merge then
-                if text_to_merge:match('^%$+%+?$') then
-                    local has_plus = text_to_merge:match('%+$')
-                    text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
-                end 
-                --TODO this is not always what we want, compare blind reward vs. foil tooltip
-                if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
-                popup_text = popup_text..text_to_merge..' '
-            else
-                find_strings(v)
-            end
-        end
-    end
-    find_strings(popup)
+    popup_text = BlackHole.find_strings({to_search = popup,
+        target = function(to_search) return to_search.nodes end, 
+        str_manip = function(text_to_merge)
+            if text_to_merge:match('^%$+%+?$') then
+                local has_plus = text_to_merge:match('%+$')
+                text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+            end 
+            --TODO this is not always what we want, compare blind reward vs. foil tooltip
+            if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+            return text_to_merge
+        end})
     if popup_text ~= '' then 
         --tts.silence()
         tts.say(popup_text)
@@ -192,18 +213,27 @@ end
 
 function BlackHole.read_button(node)
     local q
-    local but_text = ''
-    -- Should we just make this a generic function? It's used quite often for reading UI nodes
-    -- If we were we'd need to consider an "extra args" function to handle additional text manip such as $ symbol concentration
-    local function find_strings(target)
-        for _, v in ipairs(target.children or {}) do
-            local text_to_merge = nil
-            if v.config and type(v.config.text) == 'string' then
-                text_to_merge = ""..v.config.text
-            elseif v.config and v.config.object and v.config.object.string then
-                text_to_merge = ""..v.config.object.string
+    local but_text = BlackHole.find_strings({to_search = node,
+        target = function(to_search) return to_search.children end, 
+        str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
+            if text_to_merge:match('^%$%$+%+?$') then
+                local has_plus = text_to_merge:match('%+$')
+                text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
             end
-            if text_to_merge then
+            if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+            local x_base = localize('k_x_base')
+            if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
+            return text_to_merge
+        end
+    })
+    local is_blind_select_button = false
+    for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
+        if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
+    end
+    if is_blind_select_button then
+        but_text = BlackHole.find_strings({to_search = node.parent.parent.parent,
+            target = function(to_search) return to_search.children end, 
+            str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
                 if text_to_merge:match('^%$%$+%+?$') then
                     local has_plus = text_to_merge:match('%+$')
                     text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
@@ -211,20 +241,9 @@ function BlackHole.read_button(node)
                 if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
-                but_text = but_text..text_to_merge..' '
-            else
-                find_strings(v)
+                return text_to_merge
             end
-        end
-    end
-    find_strings(node)
-    local is_blind_select_button = false
-    for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
-        if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
-    end
-    if is_blind_select_button then
-        but_text = ''
-        find_strings(node.parent.parent.parent)
+        })
     end
     local is_cashout_button = node.config.id == 'cash_out_button'
     if is_cashout_button then
@@ -240,7 +259,21 @@ function BlackHole.read_button(node)
     if is_tab_shoulders then
         but_text = ''
         for _,v in ipairs(node.children) do
-            if v.children[1].config.chosen then find_strings(v.children[1]) end
+            if v.children[1].config.chosen then 
+                but_text = but_text..BlackHole.find_strings({to_search = v.children[1],
+                    target = function(to_search) return to_search.children end, 
+                    str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
+                        if text_to_merge:match('^%$%$+%+?$') then
+                            local has_plus = text_to_merge:match('%+$')
+                            text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+                        end
+                        if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+                        local x_base = localize('k_x_base')
+                        if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
+                        return text_to_merge
+                    end
+                })
+            end
         end
     end
     local is_play_hand = but_text == localize('b_play_hand')..' '
