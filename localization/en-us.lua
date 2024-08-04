@@ -32,10 +32,10 @@ return {
             tts_kc_off = [[The keyboard controller is disabled. Press 4 to enable it. ]],
             tts_kc_on = [[The keyboard controller is enabled. Press 4 to disable it. Press 5 to customize keybinds. ]],
             tts_skip_blind = "Skip Blind for - ",
-            tts_select_run_choice = [[Press A to start a new run. Press B to continue your run.]],
+            tts_select_run_choice = [[Press A to start a new run. Press B to continue your run. Press Start to cancel. ]],
             tts_continuing_run = [[Continuing your run. ]],
             tts_starting_run = [[Starting your run. ]],
-            tts_init_deck_select = [[Use the D-Pad Left and Right buttons to select a deck. Use the shoulder buttons to select a stake. Press A to start your run once you are ready. ]],
+            tts_init_deck_select = [[Use the D-Pad Left and Right buttons to select a deck. Use the shoulder buttons to select a stake. Press A to start your run once you are ready. Press Start to cancel. ]],
             tts_locked_deck = [[This deck is locked. To play it, first fulfill its unlock condition. ]]
         },
         tts_keybinds = {

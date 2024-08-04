@@ -445,7 +445,8 @@ function BlackHole.run_setup_controller(button)
     if n == 1 then
         tts.silence()
         BlackHole.capture_controller = 2
-        if G.FUNCS.can_continue({ config = { func = true } }) then
+        -- remove continue option if starting from run
+        if G.FUNCS.can_continue({ config = { func = true } }) and G.STAGE == G.STAGES.MAIN_MENU then
             tts.say(localize('tts_select_run_choice'))
         else
             BlackHole.run_setup_controller('a')
@@ -514,6 +515,7 @@ function BlackHole.run_setup_controller(button)
             tts.silence()
             tts.say(localize('tts_continuing_run'))
             BlackHole.capture_controller = nil
+            if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
         end
     elseif n == 4 then
@@ -584,6 +586,7 @@ function BlackHole.run_setup_controller(button)
             tts.silence()
             tts.say(localize('tts_starting_run'))
             BlackHole.capture_controller = nil
+            if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
         end
     end
