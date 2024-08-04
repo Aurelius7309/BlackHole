@@ -1,10 +1,11 @@
 return {
     misc = {
         v_dictionary = {
-            tts_welcome = [[Welcome to Balatro! Using Black Hole, version #1#. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
+            tts_welcome = [[Welcome to Balatro! Using Black Hole, version #1#. Press Y to start a new run. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
             tts_config_keybind = [[The keybind for #1# is set to #2# ... Press 6 to assign a new key. Press 5 to configure the next keybind. ]],
             tts_assign_keybind = [[Please press the key to bind to #1#. ]],
             tts_invalid_key = [[Key #1# is reserved for Black Hole configuration. Please enter a different key. ]],
+            tts_confirm_continue = [[Press A to continue this run: #1#, Round: #2#, Ante: #3#, Money: #4#, Best Hand: #5#. ]],
             tts_game_speed = [[Changed the game speed to #1#. ]],
             tts_highlighted = [[Selected #1#]],
             tts_hand_eval = [[#1#, level #2#. #3# X #4# ]],
@@ -31,6 +32,10 @@ return {
             tts_kc_off = [[The keyboard controller is disabled. Press 4 to enable it. ]],
             tts_kc_on = [[The keyboard controller is enabled. Press 4 to disable it. Press 5 to customize keybinds. ]],
             tts_skip_blind = "Skip Blind for - ",
+            tts_select_run_choice = [[Press A to start a new run. Press B to continue your run.]],
+            tts_continuing_run = [[Continuing your run. ]],
+            tts_init_deck_select = [[Use the D-Pad Left + Right buttons to select a deck. Use the shoulder buttons to select a stake. Press A to start your run once you are ready. ]]
+
         },
         tts_keybinds = {
             dpleft = 'D-Pad left',

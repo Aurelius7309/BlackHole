@@ -17,7 +17,7 @@ end
 BlackHole:save_config()
 
 tts = SMODS.load_file('Love2talk/Love2talk.lua')()
-G.E_MANAGER:add_event(Event{
+G.E_MANAGER:add_event(Event {
     func = function()
         if SMODS.booted then
             tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version } })
@@ -42,19 +42,19 @@ local keybind_list = {
 }
 BlackHole.keybind_lookup = {}
 for i = 1, #keybind_list do
-    BlackHole.keybind_lookup[keybind_list[i]] = keybind_list[i == #keybind_list and 1 or i+1]
+    BlackHole.keybind_lookup[keybind_list[i]] = keybind_list[i == #keybind_list and 1 or i + 1]
 end
-SMODS.Keybind{
-	key = 'welcome',
-	key_pressed = '1',
+SMODS.Keybind {
+    key = 'welcome',
+    key_pressed = '1',
     action = function(controller)
         tts.silence()
-        tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version }})
+        tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version } })
     end,
 }
-SMODS.Keybind{
-	key = 'game_speed',
-	key_pressed = '2',
+SMODS.Keybind {
+    key = 'game_speed',
+    key_pressed = '2',
     action = function(controller)
         local nopeus = (SMODS.Mods.nopeus or {}).can_load
         local sequence = {
@@ -72,29 +72,29 @@ SMODS.Keybind{
         }
         G.SETTINGS.GAMESPEED = sequence[G.SETTINGS.GAMESPEED]
         tts.silence()
-        tts.say(localize { type = 'variable', key = 'tts_game_speed', vars = { G.SETTINGS.GAMESPEED }})
+        tts.say(localize { type = 'variable', key = 'tts_game_speed', vars = { G.SETTINGS.GAMESPEED } })
         G:save_settings()
     end,
 }
-SMODS.Keybind{
+SMODS.Keybind {
     key = 'kc_setup',
     key_pressed = '3',
     action = function(controller)
         tts.silence()
-        tts.say(localize('tts_kc_'..(BlackHole.config.keyboard_controller and 'on' or 'off')))
+        tts.say(localize('tts_kc_' .. (BlackHole.config.keyboard_controller and 'on' or 'off')))
     end
 }
-SMODS.Keybind{
+SMODS.Keybind {
     key = 'kc_toggle',
     key_pressed = '4',
     action = function(controller)
         BlackHole.config.keyboard_controller = not BlackHole.config.keyboard_controller
         BlackHole:save_config()
         tts.silence()
-        tts.say(localize('tts_kc_'..(BlackHole.config.keyboard_controller and 'on' or 'off')))
+        tts.say(localize('tts_kc_' .. (BlackHole.config.keyboard_controller and 'on' or 'off')))
     end
 }
-SMODS.Keybind{
+SMODS.Keybind {
     key = 'kc_info',
     key_pressed = '5',
     action = function(controller)
@@ -113,7 +113,7 @@ SMODS.Keybind{
     end
 }
 
-SMODS.Keybind{
+SMODS.Keybind {
     key = 'kc_change',
     key_pressed = '6',
     action = function(controller)
@@ -129,23 +129,24 @@ SMODS.Keybind{
 }
 
 BlackHole.reserved_keys = {}
-for i = 1, 6 do BlackHole.reserved_keys[''..i] = true end
+for i = 1, 6 do BlackHole.reserved_keys['' .. i] = true end
 
 -- "to_search" is table of where to start the search
--- "target" is function returning where to start search, 
+-- "target" is function returning where to start search,
 -- "search_params" is table containing "override" (ignore base search checks) and "search" (function for custom search)
 -- "str_manip" is function for string manip after search
 function BlackHole.find_strings(t)
-    local to_search, target, search_params, str_manip = t.to_search or {}, t.target or function(to_search) return to_search end, t.search_params or {}, t.str_manip or nil
+    local to_search, target, search_params, str_manip = t.to_search or {},
+        t.target or function(to_search) return to_search end, t.search_params or {}, t.str_manip or nil
     local final_str = ''
     local function find_strings_recurse(to_search)
         to_search = target(to_search) or {}
         for _, v in ipairs(to_search) do
             local text_to_merge = nil
-            if search_params.override then 
-                text_to_merge = ""..search_params.search(v, text_to_merge)
+            if search_params.override then
+                text_to_merge = "" .. search_params.search(v, text_to_merge)
             elseif v.config and type(v.config.text) == 'string' then
-                text_to_merge = ""..v.config.text
+                text_to_merge = "" .. v.config.text
             elseif v.config and v.config.object and v.config.object.string then
                 text_to_merge = ""..v.config.object.string
             elseif search_params.search and type(search_params.search) == "function" and search_params.search(v, text_to_merge) ~= nil then
@@ -153,7 +154,7 @@ function BlackHole.find_strings(t)
             end
             if text_to_merge then
                 if str_manip and type(str_manip) == "function" then text_to_merge = str_manip(text_to_merge) end
-                final_str = final_str..text_to_merge..' '
+                final_str = final_str .. text_to_merge .. ' '
             else
                 find_strings_recurse(v)
             end
@@ -169,12 +170,12 @@ function BlackHole.process_hover(controller)
     -- Do not restart speech  when the same node is hovered again
     if BlackHole.last_tts_node == node and BlackHole.hover_time_elapsed <= 3 then return end
     if node:is(Card) and node.area == G.deck then
-         --ugly
-            node.tts = localize('k_view')..' '..localize('k_deck')
+        --ugly
+        node.tts = localize('k_view') .. ' ' .. localize('k_deck')
     end
     if node.tts and node.tts ~= '' then
-        tts.silence() 
-        if node.area ~= G.deck and node.facing == 'back' then 
+        tts.silence()
+        if node.area ~= G.deck and node.facing == 'back' then
             node.tts = node.highlighted and localize({
                     type = 'variable',
                     key = 'tts_highlighted',
@@ -183,7 +184,7 @@ function BlackHole.process_hover(controller)
                 localize('tts_face_down_card')
         end
         tts.say(node.tts)
-        BlackHole.last_tts_node = node 
+        BlackHole.last_tts_node = node
         BlackHole.hover_time_elapsed = 0
     else
         BlackHole.read_button(node)
@@ -193,18 +194,21 @@ end
 
 function BlackHole.read_h_popup(popup, node)
     local popup_text = ''
-    popup_text = BlackHole.find_strings({to_search = popup,
-        target = function(to_search) return to_search.nodes end, 
+    popup_text = BlackHole.find_strings({
+        to_search = popup,
+        target = function(to_search) return to_search.nodes end,
         str_manip = function(text_to_merge)
             if text_to_merge:match('^%$+%+?$') then
                 local has_plus = text_to_merge:match('%+$')
-                text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
-            end 
+                text_to_merge = localize('$') .. (text_to_merge:len() - (has_plus and 1 or 0)) ..
+                (has_plus and ' +' or '')
+            end
             --TODO this is not always what we want, compare blind reward vs. foil tooltip
-            if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+            if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge .. ' -' end
             return text_to_merge
-        end})
-    if popup_text ~= '' then 
+        end
+    })
+    if popup_text ~= '' then
         --tts.silence()
         tts.say(popup_text)
         BlackHole.last_tts_node = node
@@ -213,14 +217,16 @@ end
 
 function BlackHole.read_button(node)
     local q
-    local but_text = BlackHole.find_strings({to_search = node,
-        target = function(to_search) return to_search.children end, 
+    local but_text = BlackHole.find_strings({
+        to_search = node,
+        target = function(to_search) return to_search.children end,
         str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
             if text_to_merge:match('^%$%$+%+?$') then
                 local has_plus = text_to_merge:match('%+$')
-                text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+                text_to_merge = localize('$') .. (text_to_merge:len() - (has_plus and 1 or 0)) ..
+                (has_plus and ' +' or '')
             end
-            if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+            if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
             local x_base = localize('k_x_base')
             if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
             if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
@@ -228,18 +234,22 @@ function BlackHole.read_button(node)
         end
     })
     local is_blind_select_button = false
-    for _, v in ipairs{ "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
-        if but_text == localize(v, 'blind_states')..' ' then is_blind_select_button = true; break end
+    for _, v in ipairs { "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
+        if but_text == localize(v, 'blind_states') .. ' ' then
+            is_blind_select_button = true; break
+        end
     end
     if is_blind_select_button then
-        but_text = BlackHole.find_strings({to_search = node.parent.parent.parent,
-            target = function(to_search) return to_search.children end, 
+        but_text = BlackHole.find_strings({
+            to_search = node.parent.parent.parent,
+            target = function(to_search) return to_search.children end,
             str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
                 if text_to_merge:match('^%$%$+%+?$') then
                     local has_plus = text_to_merge:match('%+$')
-                    text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+                    text_to_merge = localize('$') ..
+                    (text_to_merge:len() - (has_plus and 1 or 0)) .. (has_plus and ' +' or '')
                 end
-                if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+                if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
                 if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
@@ -260,39 +270,41 @@ function BlackHole.read_button(node)
     local is_tab_shoulders = node.config.id == 'tab_shoulders'
     if is_tab_shoulders then
         but_text = ''
-        for _,v in ipairs(node.children) do
-            if v.children[1].config.chosen then 
-                but_text = but_text..BlackHole.find_strings({to_search = v.children[1],
-                    target = function(to_search) return to_search.children end, 
+        for _, v in ipairs(node.children) do
+            if v.children[1].config.chosen then
+                but_text = but_text .. BlackHole.find_strings({
+                    to_search = v.children[1],
+                    target = function(to_search) return to_search.children end,
                     str_manip = function(text_to_merge) --Note: This is using the previous find_strings function logic. Might not be needed in times the function is called
                         if text_to_merge:match('^%$%$+%+?$') then
                             local has_plus = text_to_merge:match('%+$')
-                            text_to_merge = localize('$')..(text_to_merge:len() - (has_plus and 1 or 0))..(has_plus and ' +' or '')
+                            text_to_merge = localize('$') ..
+                            (text_to_merge:len() - (has_plus and 1 or 0)) .. (has_plus and ' +' or '')
                         end
-                        if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
+                        if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
                         local x_base = localize('k_x_base')
-                        if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
+                        if text_to_merge:sub(- #x_base) == x_base then text_to_merge = text_to_merge .. ' - ' end
                         return text_to_merge
                     end
                 })
             end
         end
     end
-    local is_play_hand = but_text == localize('b_play_hand')..' '
-    local is_discard =  but_text == localize('b_discard')..' '
+    local is_play_hand = but_text == localize('b_play_hand') .. ' '
+    local is_discard = but_text == localize('b_discard') .. ' '
     if is_play_hand or is_discard then
         local amount = G.GAME.current_round[is_play_hand and 'hands_left' or 'discards_left']
         but_text = but_text .. localize {
             type = 'variable',
             key = 'tts_remaining',
-            vars = { amount, localize((is_play_hand and 'tts_hand' or 'tts_discard')..(amount ~= 1 and 's' or '')) }
+            vars = { amount, localize((is_play_hand and 'tts_hand' or 'tts_discard') .. (amount ~= 1 and 's' or '')) }
         }
     end
     if is_play_hand and node.config.button then
         if G.boss_throw_hand then
-            but_text = but_text.. " - " .. localize('ph_unscored_hand') .. G.GAME.blind:get_loc_debuff_text() .. " - "
+            but_text = but_text .. " - " .. localize('ph_unscored_hand') .. G.GAME.blind:get_loc_debuff_text() .. " - "
         end
-        local text,disp_text = G.FUNCS.get_poker_hand_info(G.hand.highlighted)
+        local text, disp_text = G.FUNCS.get_poker_hand_info(G.hand.highlighted)
         local hand = G.GAME.hands[text]
         but_text = but_text .. localize {
             type = 'variable',
@@ -302,10 +314,11 @@ function BlackHole.read_button(node)
         but_text = but_text .. localize {
             type = 'variable',
             key = 'tts_played_this_run',
-            vars = { hand.played, localize('tts_time'..(hand.played ~= 1 and 's' or '')) }
+            vars = { hand.played, localize('tts_time' .. (hand.played ~= 1 and 's' or '')) }
         }
     end
-    local is_poker_hand_button = (node.config.on_demand_tooltip and G.GAME.hands[node.config.on_demand_tooltip.filler.args]) and true or nil
+    local is_poker_hand_button = (node.config.on_demand_tooltip and G.GAME.hands[node.config.on_demand_tooltip.filler.args]) and
+    true or nil
     if is_poker_hand_button then
         local poker_hand_info = G.GAME.hands[node.config.on_demand_tooltip.filler.args]
         but_text = localize {
@@ -316,8 +329,83 @@ function BlackHole.read_button(node)
         but_text = but_text .. localize {
             type = 'variable',
             key = 'tts_played_this_run',
-            vars = { poker_hand_info.played, localize('tts_time'..(poker_hand_info.played ~= 1 and 's' or '')) }
+            vars = { poker_hand_info.played, localize('tts_time' .. (poker_hand_info.played ~= 1 and 's' or '')) }
         }
+    end
+    local function check_parents(node, uie_id)
+        if node:is(UIBox) and node:get_UIE_by_ID(uie_id) then return node:get_UIE_by_ID(uie_id)
+        elseif node.parent then return check_parents(node.parent, uie_id) 
+        else return nil end
+    end
+    local node_with_tag_container = check_parents(node, 'tag_container')
+    if node_with_tag_container and but_text:match(localize('b_skip_blind')) then
+        -- TODO: un-scuff, assuming you even can
+        local tag, tag_sprite = node_with_tag_container.children[2].children[2].Mid.config.ref_table, node_with_tag_container.children[2].children[2].Mid.config.ref_table.tag_sprite
+        local tag_tts, tag_AUT = '', tag_sprite.ability_UIBox_table
+        if tag_AUT == nil then tag:get_uibox_table(tag_sprite); tag_AUT = tag_sprite.ability_UIBox_table end
+
+        if tag_AUT.name and type(tag_AUT.name) == 'table' then
+            if tag_AUT.name[1].config.object then
+                tag_tts = tag_tts..tag_AUT.name[1].config.object.string.. ' - '
+            else
+                local name_text = ''
+                for _, v in ipairs(tag_AUT.name) do
+                    if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
+                end
+                tag_tts = tag_tts .. name_text .. ' - '
+            end
+        end
+        local desc_text = ''
+        for _, v in ipairs(tag_AUT.main) do
+            desc_text = desc_text..BlackHole.find_strings({to_search = v,
+                search_params = {
+                    override = true,
+                    search = function(to_search, text_to_merge)
+                        if to_search.config and type(to_search.config.text) == 'string' then
+                            text_to_merge = to_search.config.text
+                        elseif to_search.config and to_search.config.object and to_search.config.object.string then
+                            local str = to_search.config.object.string
+                            if type(str) == 'table' then
+                                text_to_merge = table.concat(str, ' ')
+                            else
+                                text_to_merge = str
+                            end
+                        elseif to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
+                            text_to_merge = to_search.nodes[1].config.text
+                        end
+                        return text_to_merge
+                    end
+                }
+            })..' '
+        end
+        tag_tts = tag_tts..desc_text..'- '
+
+        for _, v in ipairs(tag_AUT.info) do
+            tag_tts = tag_tts..v.name..' - '
+
+            local tooltip_desc_text = ""
+            tooltip_desc_text = BlackHole.find_strings({to_search = v,
+                search_params = {
+                    search = function(to_search, text_to_merge)
+                        if to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
+                            text_to_merge = to_search.nodes[1].config.text
+                        end
+                        return text_to_merge
+                    end
+                },
+                str_manip = function(text_to_merge)
+                    if text_to_merge:match('^%$+%+$') then
+                        text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                    end
+                    if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                    return text_to_merge
+                end
+            })
+
+            tag_tts = tag_tts..tooltip_desc_text .. ' - '
+        end
+
+        but_text = but_text..tag_tts
     end
     local function check_parents(node, uie_id)
         if node:is(UIBox) and node:get_UIE_by_ID(uie_id) then return node:get_UIE_by_ID(uie_id)
@@ -398,5 +486,102 @@ function BlackHole.read_button(node)
         if not q then tts.silence() end
         tts.say(but_text)
         BlackHole.last_tts_node = node
+    end
+end
+
+function BlackHole.run_setup_controller(button)
+    if button == 'start' then
+        BlackHole.capture_controller = nil; return
+    end
+    local n = BlackHole.capture_controller
+    if n == 1 then
+        tts.silence()
+        BlackHole.capture_controller = 2
+        if G.FUNCS.can_continue({ config = { func = true } }) then
+            tts.say(localize('tts_select_run_choice'))
+        else
+            BlackHole.run_setup_controller('a')
+        end
+    elseif n == 2 then
+        if button == 'a' then
+            if not G.SAVED_GAME then
+                G.SAVED_GAME = get_compressed(G.SETTINGS.profile .. '/' .. 'save.jkr')
+                if G.SAVED_GAME ~= nil then G.SAVED_GAME = STR_UNPACK(G.SAVED_GAME) end
+            end
+
+            G.SETTINGS.current_setup = type
+            G.GAME.viewed_back = Back(get_deck_from_name(G.PROFILES[G.SETTINGS.profile].MEMORY.deck))
+
+            G.PROFILES[G.SETTINGS.profile].MEMORY.stake = G.PROFILES[G.SETTINGS.profile].MEMORY.stake or 1
+            G.viewed_stake = G.PROFILES[G.SETTINGS.profile].MEMORY.stake or 1
+            G.FUNCS.change_stake({to_key = G.viewed_stake})
+            for k, v in ipairs(G.P_CENTER_POOLS.Back) do
+              if v.name == G.GAME.viewed_back.name then BlackHole.viewed_deck_idx = k end
+            end
+            BlackHole.viewed_stake_idx = 1
+            for k, v in ipairs(G.P_CENTER_POOLS.Stake) do
+                if v.stake_level == G.viewed_stake then BlackHole.viewed_stake_idx = k; break end
+            end
+            tts.silence()
+            tts.say(localize('tts_init_deck_select'))
+            BlackHole.capture_controller = 4
+        elseif button == 'b' then
+            if not G.SAVED_GAME then
+                G.SAVED_GAME = get_compressed(G.SETTINGS.profile .. '/' .. 'save.jkr')
+                if G.SAVED_GAME ~= nil then G.SAVED_GAME = STR_UNPACK(G.SAVED_GAME) end
+            end
+
+            G.SETTINGS.current_setup = 'Continue'
+            G.GAME.viewed_back = Back(get_deck_from_name(G.PROFILES[G.SETTINGS.profile].MEMORY.deck))
+
+            G.PROFILES[G.SETTINGS.profile].MEMORY.stake = G.PROFILES[G.SETTINGS.profile].MEMORY.stake or 1
+            G.viewed_stake = 1
+            if G.SAVED_GAME ~= nil then
+                saved_game = G.SAVED_GAME
+                local viewed_deck = 'b_red'
+                for k, v in pairs(G.P_CENTERS) do
+                    if v.name == saved_game.BACK.name then viewed_deck = k end
+                end
+                G.GAME.viewed_back:change_to(G.P_CENTERS[viewed_deck])
+                G.viewed_stake = saved_game.GAME.stake or 1
+            end
+            --[[
+            local ordered_names, viewed_deck = {}, 1
+            for k, v in ipairs(G.P_CENTER_POOLS.Back) do
+                ordered_names[#ordered_names+1] = v.name
+                if v.name == G.GAME.viewed_back.name then viewed_deck = k end
+            end
+            --]]
+            tts.silence()
+            tts.say(localize {
+                type = 'variable',
+                key = 'tts_confirm_continue',
+                vars = {
+                    localize { type = 'name_text', set = 'Back', key = G.GAME.viewed_back.effect.center.key },
+                    tostring(saved_game.GAME.round),
+                    tostring(saved_game.GAME.round_resets.ante),
+                    localize('$') .. format_ui_value(saved_game.GAME.dollars),
+                    number_format(saved_game.GAME.round_scores.hand.amt)
+                }
+            })
+            BlackHole.capture_controller = 3
+        end
+    elseif n == 3 then
+        if button == 'a' then
+            tts.silence()
+            tts.say(localize('tts_continuing_run'))
+            BlackHole.capture_controller = nil
+            G.FUNCS.start_setup_run()
+        end
+    elseif n == 4 then
+        if button == 'dpleft' then
+
+        elseif button == 'dpright' then
+
+        elseif button == 'leftshoulder' then
+
+        elseif button == 'rightshoulder' then
+
+        end
     end
 end

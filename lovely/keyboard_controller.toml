@@ -41,3 +41,29 @@ payload = """if BlackHole.awaiting_keypress or BlackHole.cancel_release then
     return
 end
 if BlackHole.config.keyboard_controller and G.keybind_mapping[key] then love.gamepadreleased"""
+
+[[patches]]
+[patches.pattern]
+target = "main.lua"
+pattern = "G.CONTROLLER:button_press(button)"
+position = "before"
+payload = """
+if G.STATE == G.STATES.MENU and button == 'y' then
+    BlackHole.capture_controller = 1
+end
+if BlackHole.capture_controller then
+    BlackHole.run_setup_controller(button)
+    return
+end
+"""
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "main.lua"
+pattern = "G.CONTROLLER:button_release(button)"
+position = "before"
+payload = """
+if BlackHole.capture_controller then return end
+"""
+match_indent = true

@@ -7,7 +7,7 @@ return {
         x = 'x',
         y = 'c',
         a = 'space',
-        b = 'shift',
+        b = 'lshift',
         start = 'esc',
         triggerleft = 'q',
         triggerright = 'e',
