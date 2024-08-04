@@ -407,86 +407,34 @@ function BlackHole.read_button(node)
 
         but_text = but_text..tag_tts
     end
-    local function check_parents(node, uie_id)
-        if node:is(UIBox) and node:get_UIE_by_ID(uie_id) then return node:get_UIE_by_ID(uie_id)
-        elseif node.parent then return check_parents(node.parent, uie_id) 
-        else return nil end
-    end
-    local node_with_tag_container = check_parents(node, 'tag_container')
-    if node_with_tag_container and but_text:match(localize('b_skip_blind')) then
-        -- TODO: un-scuff, assuming you even can
-        local tag, tag_sprite = node_with_tag_container.children[2].children[2].Mid.config.ref_table, node_with_tag_container.children[2].children[2].Mid.config.ref_table.tag_sprite
-        local tag_tts, tag_AUT = '', tag_sprite.ability_UIBox_table
-        if tag_AUT == nil then tag:get_uibox_table(tag_sprite); tag_AUT = tag_sprite.ability_UIBox_table end
-
-        if tag_AUT.name and type(tag_AUT.name) == 'table' then
-            if tag_AUT.name[1].config.object then
-                tag_tts = tag_tts..tag_AUT.name[1].config.object.string.. ' - '
-            else
-                local name_text = ''
-                for _, v in ipairs(tag_AUT.name) do
-                    if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
-                end
-                tag_tts = tag_tts .. name_text .. ' - '
-            end
-        end
-        local desc_text = ''
-        for _, v in ipairs(tag_AUT.main) do
-            desc_text = desc_text..BlackHole.find_strings({to_search = v,
-                search_params = {
-                    override = true,
-                    search = function(to_search, text_to_merge)
-                        if to_search.config and type(to_search.config.text) == 'string' then
-                            text_to_merge = to_search.config.text
-                        elseif to_search.config and to_search.config.object and to_search.config.object.string then
-                            local str = to_search.config.object.string
-                            if type(str) == 'table' then
-                                text_to_merge = table.concat(str, ' ')
-                            else
-                                text_to_merge = str
-                            end
-                        elseif to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
-                            text_to_merge = to_search.nodes[1].config.text
-                        end
-                        return text_to_merge
-                    end
-                }
-            })..' '
-        end
-        tag_tts = tag_tts..desc_text..'- '
-
-        for _, v in ipairs(tag_AUT.info) do
-            tag_tts = tag_tts..v.name..' - '
-
-            local tooltip_desc_text = ""
-            tooltip_desc_text = BlackHole.find_strings({to_search = v,
-                search_params = {
-                    search = function(to_search, text_to_merge)
-                        if to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
-                            text_to_merge = to_search.nodes[1].config.text
-                        end
-                        return text_to_merge
-                    end
-                },
-                str_manip = function(text_to_merge)
-                    if text_to_merge:match('^%$+%+$') then
-                        text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
-                    end
-                    if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
-                    return text_to_merge
-                end
-            })
-
-            tag_tts = tag_tts..tooltip_desc_text .. ' - '
-        end
-
-        but_text = but_text..tag_tts
-    end
     if but_text ~= '' then
         if not q then tts.silence() end
         tts.say(but_text)
         BlackHole.last_tts_node = node
     end
+end
+
+function BlackHole.read_back_info()
+    local center = G.GAME.viewed_back.effect.center
+    local name_text = center.unlocked and
+        localize { type = 'name_text', set = 'Back', key = center.key } or 
+        localize { type = 'name_text', set = 'Other', key = 'locked' }
+    local desc_text = BlackHole.find_strings({
+        to_search = G.GAME.viewed_back:generate_UI(),
+        target = function(to_search) return to_search.nodes end,
+    })
+    return name_text .. ' - ' .. desc_text
+end
+function BlackHole.read_stake_info()
+    if not G.GAME.viewed_back.effect.center.unlocked then return '' end
+    local stake = G.viewed_stake
+    for _, v in ipairs(G.P_CENTER_POOLS.Stake) do
+        if v.stake_level == stake then stake = v; break end
+    end
+    if type(stake) ~= 'table' then return '' end
+    local name_text = localize { type = 'name_text', set = 'Stake', key = stake.key }
+    local desc_text = table.concat(localize { type = 'raw_descriptions', set = 'Stake', key = stake.key }, ' ')
+    return name_text .. ' - ' .. desc_text
 end
 
 function BlackHole.run_setup_controller(button)
@@ -509,7 +457,7 @@ function BlackHole.run_setup_controller(button)
                 if G.SAVED_GAME ~= nil then G.SAVED_GAME = STR_UNPACK(G.SAVED_GAME) end
             end
 
-            G.SETTINGS.current_setup = type
+            G.SETTINGS.current_setup = 'New Run'
             G.GAME.viewed_back = Back(get_deck_from_name(G.PROFILES[G.SETTINGS.profile].MEMORY.deck))
 
             G.PROFILES[G.SETTINGS.profile].MEMORY.stake = G.PROFILES[G.SETTINGS.profile].MEMORY.stake or 1
@@ -524,6 +472,8 @@ function BlackHole.run_setup_controller(button)
             end
             tts.silence()
             tts.say(localize('tts_init_deck_select'))
+            tts.say(BlackHole.read_back_info())
+            tts.say(BlackHole.read_stake_info())
             BlackHole.capture_controller = 4
         elseif button == 'b' then
             if not G.SAVED_GAME then
@@ -545,13 +495,6 @@ function BlackHole.run_setup_controller(button)
                 G.GAME.viewed_back:change_to(G.P_CENTERS[viewed_deck])
                 G.viewed_stake = saved_game.GAME.stake or 1
             end
-            --[[
-            local ordered_names, viewed_deck = {}, 1
-            for k, v in ipairs(G.P_CENTER_POOLS.Back) do
-                ordered_names[#ordered_names+1] = v.name
-                if v.name == G.GAME.viewed_back.name then viewed_deck = k end
-            end
-            --]]
             tts.silence()
             tts.say(localize {
                 type = 'variable',
@@ -575,13 +518,73 @@ function BlackHole.run_setup_controller(button)
         end
     elseif n == 4 then
         if button == 'dpleft' then
-
+            local new_idx = BlackHole.viewed_deck_idx - 1
+            if new_idx == 0 then new_idx = #G.P_CENTER_POOLS.Back end
+            BlackHole.viewed_deck_idx = new_idx
+            G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[new_idx])
+            local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key) or 0
+            G.viewed_stake = math.min(G.viewed_stake, max_stake + 1)
+            G.PROFILES[G.SETTINGS.profile].MEMORY.deck = G.GAME.viewed_back.effect.center.name
+            G.FUNCS.change_stake({to_key = G.viewed_stake})
+            tts.silence()
+            tts.say(BlackHole.read_back_info())
+            tts.say(BlackHole.read_stake_info())
         elseif button == 'dpright' then
-
+            local new_idx = BlackHole.viewed_deck_idx + 1
+            if new_idx == #G.P_CENTER_POOLS.Back+1 then new_idx = 1 end
+            BlackHole.viewed_deck_idx = new_idx
+            G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[new_idx])
+            local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key) or 0
+            G.viewed_stake = math.min(G.viewed_stake, max_stake + 1)
+            G.PROFILES[G.SETTINGS.profile].MEMORY.deck = G.GAME.viewed_back.effect.center.name
+            G.FUNCS.change_stake({to_key = G.viewed_stake})
+            tts.silence()
+            tts.say(BlackHole.read_back_info())
+            tts.say(BlackHole.read_stake_info())
         elseif button == 'leftshoulder' then
-
+            local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key)
+            if G.PROFILES[G.SETTINGS.profile].all_unlocked then max_stake = #G.P_CENTER_POOLS['Stake'] end
+            local stake_options = {}
+            for i = 1, math.min(max_stake+1, #G.P_CENTER_POOLS['Stake']) do
+              stake_options[i] = i
+            end
+            local new_idx = BlackHole.viewed_stake_idx - 1
+            if new_idx == 0 then new_idx = #stake_options end
+            if new_idx ~= BlackHole.viewed_stake_idx then
+                G.viewed_stake = new_idx
+                BlackHole.viewed_stake_idx = new_idx
+                G.FUNCS.change_stake({to_key = G.viewed_stake})
+                tts.silence()
+                tts.say(BlackHole.read_stake_info())
+                tts.say(BlackHole.read_back_info())
+            end
         elseif button == 'rightshoulder' then
-
+            local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key)
+            if G.PROFILES[G.SETTINGS.profile].all_unlocked then max_stake = #G.P_CENTER_POOLS['Stake'] end
+            local stake_options = {}
+            for i = 1, math.min(max_stake+1, #G.P_CENTER_POOLS['Stake']) do
+              stake_options[i] = i
+            end
+            local new_idx = BlackHole.viewed_stake_idx + 1
+            if new_idx == #stake_options+1 then new_idx = 1 end
+            if new_idx ~= BlackHole.viewed_stake_idx then
+                G.viewed_stake = new_idx
+                G.FUNCS.change_stake({to_key = G.viewed_stake})
+                BlackHole.viewed_stake_idx = new_idx
+                tts.silence()
+                tts.say(BlackHole.read_stake_info())
+                tts.say(BlackHole.read_back_info())
+            end
+        elseif button == 'a' then
+            if not G.GAME.viewed_back.effect.center.unlocked then 
+                tts.silence()
+                tts.say(localize('tts_locked_deck'))
+                return
+            end
+            tts.silence()
+            tts.say(localize('tts_starting_run'))
+            BlackHole.capture_controller = nil
+            G.FUNCS.start_setup_run()
         end
     end
 end

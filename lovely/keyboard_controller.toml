@@ -43,10 +43,12 @@ end
 if BlackHole.config.keyboard_controller and G.keybind_mapping[key] then love.gamepadreleased"""
 
 [[patches]]
-[patches.pattern]
+[patches.regex]
 target = "main.lua"
-pattern = "G.CONTROLLER:button_press(button)"
-position = "before"
+pattern = '''function love\.gamepadpressed\(joystick, button\)
+(?<indent>[\t ]*)button = G\.button_mapping\[button\] or button
+'''
+position = "after"
 payload = """
 if G.STATE == G.STATES.MENU and button == 'y' then
     BlackHole.capture_controller = 1
@@ -56,14 +58,26 @@ if BlackHole.capture_controller then
     return
 end
 """
-match_indent = true
+line_prepend = '$indent'
 
 [[patches]]
-[patches.pattern]
+[patches.regex]
 target = "main.lua"
-pattern = "G.CONTROLLER:button_release(button)"
-position = "before"
+pattern = '''function love\.gamepadreleased\(joystick, button\)
+(?<indent>[\t ]*)button = G\.button_mapping\[button\] or button
+'''
+position = "after"
 payload = """
 if BlackHole.capture_controller then return end
 """
+match_indent = true
+
+# might just change the offending line in steamodded
+[[patches]]
+[patches.regex]
+target = "functions/button_callbacks.lua"
+pattern = '''G.PROFILES\[G\.SETTINGS\.profile\]\.MEMORY\.deck = args\.to_val
+'''
+position = 'after'
+payload = "if not G.sticker_card or not G.sticker_card.area or not G.sticker_card.area.cards then return end"
 match_indent = true

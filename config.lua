@@ -8,7 +8,7 @@ return {
         y = 'c',
         a = 'space',
         b = 'lshift',
-        start = 'esc',
+        start = 'escape',
         triggerleft = 'q',
         triggerright = 'e',
         leftshoulder = 'z',
