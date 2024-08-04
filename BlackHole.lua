@@ -144,7 +144,7 @@ function BlackHole.find_strings(t)
         for _, v in ipairs(to_search) do
             local text_to_merge = nil
             if search_params.override then
-                text_to_merge = "" .. search_params.search(v, text_to_merge)
+                text_to_merge = "" .. (search_params.search(v, text_to_merge) or '')
             elseif v.config and type(v.config.text) == 'string' then
                 text_to_merge = "" .. v.config.text
             elseif v.config and v.config.object and v.config.object.string then
