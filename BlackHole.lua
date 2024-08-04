@@ -166,7 +166,11 @@ end
 
 function BlackHole.process_hover(controller)
     local node = controller.hovering.target
-    if BlackHole.hover_suppressed then return end
+    if BlackHole.hover_suppressed then
+        if G.STATE == G.STATES.GAME_OVER then -- stupid, game over deletes the event that's meant to kill the suppression
+            BlackHole.hover_suppressed = false
+        else return end
+    end
     -- Do not restart speech  when the same node is hovered again
     if BlackHole.last_tts_node == node and BlackHole.hover_time_elapsed <= 3 then return end
     if node:is(Card) and node.area == G.deck then
@@ -230,6 +234,11 @@ function BlackHole.read_button(node)
             local x_base = localize('k_x_base')
             if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
             if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
+            if text_to_merge:match(localize('b_new_run')) or text_to_merge:match(localize('b_start_new_run')) then
+                text_to_merge = localize('tts_new_run')
+                if node.config.id == 'from_game_over' then text_to_merge = localize('ph_game_over').. ' ... ' .. text_to_merge; q = true end
+                if node.config.id == 'from_game_won' then text_to_merge = localize('ph_you_win') .. text_to_merge; q = true end
+            end
             return text_to_merge
         end
     })

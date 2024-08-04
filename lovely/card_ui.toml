@@ -37,7 +37,7 @@ for i, v in ipairs(G.your_collection or {}) do
 end
 if not (card.config.card_key and card.area ~= G.shop_jokers) and not (card.area == G.pack_cards or in_collections) then
     desc_text = desc_text..localize { type = 'variable', key = 'tts_current_money', vars = { G.GAME.dollars } }
-    local shop_areas = { [G.shop_jokers] = true, [G.shop_booster] = true, [G.shop_vouchers] = true }
+    local shop_areas = { [G.shop_jokers or {}] = true, [G.shop_booster or {}] = true, [G.shop_vouchers or {}] = true }
     if card.cost and shop_areas[card.area or {}] then desc_text = desc_text..localize{type = "variable", key = "tts_card_cost", vars = {card.cost}} end
     if card.sell_cost and not shop_areas[card.area] then desc_text = desc_text..localize{type = "variable", key = "tts_card_sell", vars = {card.sell_cost}} end
 end

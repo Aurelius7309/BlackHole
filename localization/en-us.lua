@@ -36,7 +36,8 @@ return {
             tts_continuing_run = [[Continuing your run. ]],
             tts_starting_run = [[Starting your run. ]],
             tts_init_deck_select = [[Use the D-Pad Left and Right buttons to select a deck. Use the shoulder buttons to select a stake. Press A to start your run once you are ready. Press Start to cancel. ]],
-            tts_locked_deck = [[This deck is locked. To play it, first fulfill its unlock condition. ]]
+            tts_locked_deck = [[This deck is locked. To play it, first fulfill its unlock condition. ]],
+            tts_new_run = [[Press Y to start a new run. ]]
         },
         tts_keybinds = {
             dpleft = 'D-Pad left',
