@@ -90,6 +90,14 @@ for _, v in ipairs(AUT.info) do
     -- Tooltip Desc
     local tooltip_desc_text = ""
     tooltip_desc_text = BlackHole.find_strings({to_search = v,
+        search_params = {
+            search = function(to_search, text_to_merge)
+                if to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
+                    text_to_merge = to_search.nodes[1].config.text
+                end
+                return text_to_merge
+            end
+        },
         str_manip = function(text_to_merge)
             if text_to_merge:match('^%$+%+$') then
                 text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'

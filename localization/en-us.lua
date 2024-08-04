@@ -15,7 +15,7 @@ return {
             tts_discarded = [[Discarded #1# #2#. ]],
             tts_card_cost = [[Cost: $#1#. ]],
             tts_card_sell = [[Sell: $#1#. ]],
-            tts_current_money = [[Balance: $#1#. ]]
+            tts_current_money = [[Balance: $#1#. ]],
         },
         dictionary = {
             tts_time = 'time',
@@ -30,6 +30,7 @@ return {
             tts_blind_defeated = [[Blind defeated. ]],
             tts_kc_off = [[The keyboard controller is disabled. Press 4 to enable it. ]],
             tts_kc_on = [[The keyboard controller is enabled. Press 4 to disable it. Press 5 to customize keybinds. ]],
+            tts_skip_blind = "Skip Blind for - ",
         },
         tts_keybinds = {
             dpleft = 'D-Pad left',

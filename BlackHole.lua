@@ -148,7 +148,7 @@ function BlackHole.find_strings(t)
                 text_to_merge = ""..v.config.text
             elseif v.config and v.config.object and v.config.object.string then
                 text_to_merge = ""..v.config.object.string
-            elseif search_params.search and type(search_params.search) == "function" then
+            elseif search_params.search and type(search_params.search) == "function" and search_params.search(v, text_to_merge) ~= nil then
                 text_to_merge = ""..search_params.search(v, text_to_merge)
             end
             if text_to_merge then
@@ -223,6 +223,7 @@ function BlackHole.read_button(node)
             if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
             local x_base = localize('k_x_base')
             if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
+            if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
             return text_to_merge
         end
     })
@@ -241,6 +242,7 @@ function BlackHole.read_button(node)
                 if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge..' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
+                if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
                 return text_to_merge
             end
         })
@@ -316,6 +318,81 @@ function BlackHole.read_button(node)
             key = 'tts_played_this_run',
             vars = { poker_hand_info.played, localize('tts_time'..(poker_hand_info.played ~= 1 and 's' or '')) }
         }
+    end
+    local function check_parents(node, uie_id)
+        if node:is(UIBox) and node:get_UIE_by_ID(uie_id) then return node:get_UIE_by_ID(uie_id)
+        elseif node.parent then return check_parents(node.parent, uie_id) 
+        else return nil end
+    end
+    local node_with_tag_container = check_parents(node, 'tag_container')
+    if node_with_tag_container and but_text:match(localize('b_skip_blind')) then
+        -- TODO: un-scuff, assuming you even can
+        local tag, tag_sprite = node_with_tag_container.children[2].children[2].Mid.config.ref_table, node_with_tag_container.children[2].children[2].Mid.config.ref_table.tag_sprite
+        local tag_tts, tag_AUT = '', tag_sprite.ability_UIBox_table
+        if tag_AUT == nil then tag:get_uibox_table(tag_sprite); tag_AUT = tag_sprite.ability_UIBox_table end
+
+        if tag_AUT.name and type(tag_AUT.name) == 'table' then
+            if tag_AUT.name[1].config.object then
+                tag_tts = tag_tts..tag_AUT.name[1].config.object.string.. ' - '
+            else
+                local name_text = ''
+                for _, v in ipairs(tag_AUT.name) do
+                    if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
+                end
+                tag_tts = tag_tts .. name_text .. ' - '
+            end
+        end
+        local desc_text = ''
+        for _, v in ipairs(tag_AUT.main) do
+            desc_text = desc_text..BlackHole.find_strings({to_search = v,
+                search_params = {
+                    override = true,
+                    search = function(to_search, text_to_merge)
+                        if to_search.config and type(to_search.config.text) == 'string' then
+                            text_to_merge = to_search.config.text
+                        elseif to_search.config and to_search.config.object and to_search.config.object.string then
+                            local str = to_search.config.object.string
+                            if type(str) == 'table' then
+                                text_to_merge = table.concat(str, ' ')
+                            else
+                                text_to_merge = str
+                            end
+                        elseif to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
+                            text_to_merge = to_search.nodes[1].config.text
+                        end
+                        return text_to_merge
+                    end
+                }
+            })..' '
+        end
+        tag_tts = tag_tts..desc_text..'- '
+
+        for _, v in ipairs(tag_AUT.info) do
+            tag_tts = tag_tts..v.name..' - '
+
+            local tooltip_desc_text = ""
+            tooltip_desc_text = BlackHole.find_strings({to_search = v,
+                search_params = {
+                    search = function(to_search, text_to_merge)
+                        if to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
+                            text_to_merge = to_search.nodes[1].config.text
+                        end
+                        return text_to_merge
+                    end
+                },
+                str_manip = function(text_to_merge)
+                    if text_to_merge:match('^%$+%+$') then
+                        text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                    end
+                    if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                    return text_to_merge
+                end
+            })
+
+            tag_tts = tag_tts..tooltip_desc_text .. ' - '
+        end
+
+        but_text = but_text..tag_tts
     end
     if but_text ~= '' then
         if not q then tts.silence() end
