@@ -1,7 +1,7 @@
 return {
     misc = {
         v_dictionary = {
-            tts_welcome = [[Welcome to Balatro! Using Black Hole, version #1#. Press Y to start the game. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
+            tts_welcome = [[Welcome to Balatro #1#! Using Black Hole version #2#, Steamodded version #3#. Press Y to start the game. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
             tts_config_keybind = [[The keybind for #1# is set to #2# ... Press 6 to assign a new key. Press 5 to configure the next keybind. ]],
             tts_assign_keybind = [[Please press the key to bind to #1#. ]],
             tts_invalid_key = [[Key #1# is reserved for Black Hole configuration. Please enter a different key. ]],

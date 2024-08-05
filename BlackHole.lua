@@ -4,7 +4,7 @@
 --- PREFIX: blh
 --- MOD_AUTHOR: [Aure]
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.1.0
+--- VERSION: 0.2.0
 
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
@@ -20,7 +20,7 @@ tts = SMODS.load_file('Love2talk/Love2talk.lua')()
 G.E_MANAGER:add_event(Event {
     func = function()
         if SMODS.booted then
-            tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version } })
+            tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { VERSION, BlackHole.version, MODDED_VERSION:gsub('-STEAMODDED', '') } })
             return true
         end
     end
@@ -49,7 +49,7 @@ SMODS.Keybind {
     key_pressed = '1',
     action = function(controller)
         tts.silence()
-        tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { BlackHole.version } })
+        tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { VERSION, BlackHole.version, MODDED_VERSION:gsub('-STEAMODDED', '') } })
     end,
 }
 SMODS.Keybind {
