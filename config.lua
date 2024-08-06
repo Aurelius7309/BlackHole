@@ -13,6 +13,7 @@ return {
         triggerright = 'e',
         leftshoulder = 'z',
         rightshoulder = 'v',
+        back = 'tab',
     },
     keyboard_controller = false,
 }

@@ -80,13 +80,11 @@ pattern = '''G.PROFILES\[G\.SETTINGS\.profile\]\.MEMORY\.deck = args\.to_val
 '''
 position = 'after'
 payload = "if not G.sticker_card or not G.sticker_card.area or not G.sticker_card.area.cards then return end"
-match_indent = true
 
-# Allow upcoming blind selection to focus
+# Allow focus on certain disabled buttons
 [[patches]]
 [patches.regex]
 target = "functions/UI_definitions.lua"
-pattern = '''id = \'select_blind_button\', '''
+pattern = '''id = '(select_blind|play|discard)_button','''
 position = 'after'
 payload = "force_focus = true, "
-match_indent = true

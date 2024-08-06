@@ -14,6 +14,7 @@ return {
             tts_score_report = [[Scored #1# chips this hand, #2# total. ]],
             tts_required_score = [[#1# chips are needed to defeat the current Blind. ]],
             tts_discarded = [[Discarded #1# #2#. ]],
+            tts_hook = [[Boss Blind discarded #1#]],
             tts_card_cost = [[Cost: $#1#. ]],
             tts_card_sell = [[Sell: $#1#. ]],
             tts_current_money = [[Balance: $#1#. ]],
@@ -53,6 +54,7 @@ return {
             triggerright = 'Right Trigger',
             leftshoulder = 'Left Shoulder',
             rightshoulder = 'Right Shoulder',
+            back = 'Back',
         }
     }
 }

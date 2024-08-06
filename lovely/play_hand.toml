@@ -20,7 +20,6 @@ pattern = "G.FUNCS.evaluate_play()"
 position = "after"
 payload = """G.E_MANAGER:add_event(Event({
     func = function()
-        tts.silence()
         tts.say(localize{
             type = 'variable', 
             key = 'tts_score_report',
@@ -69,22 +68,47 @@ payload = """BlackHole.hover_suppressed = true
 G.E_MANAGER:add_event(Event({
     func = function()
         tts.silence()
-        tts.say(localize{
-            type = 'variable', 
-            key = 'tts_discarded',
-            vars = { #cards, localize('tts_card'..(#cards ~= 1 and 's' or '')) }
-        })
+        if hook then
+            local card_names = ''
+            for k, card in ipairs(cards) do
+                local AUT = card:generate_UIBox_ability_table()
+                if AUT.name and type(AUT.name) == 'table' then
+                    if AUT.name[1].config.object then
+                        card_names = card_names..AUT.name[1].config.object.string.. ' - '
+                    else
+                        local name_text = ''
+                        for _, v in ipairs(AUT.name) do
+                            if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
+                        end
+                        card_names = card_names .. name_text .. ' - '
+                    end
+                end
+            end
+            tts.say(localize{
+                type = 'variable',
+                key = 'tts_hook',
+                vars={card_names},
+            })
+        else
+            tts.say(localize{
+                type = 'variable', 
+                key = 'tts_discarded',
+                vars = { #cards, localize('tts_card'..(#cards ~= 1 and 's' or '')) }
+            }) 
+        end
         return true
     end
 }))
-G.E_MANAGER:add_event(Event({
-    trigger = 'after',
-    delay = 2.0*math.sqrt(G.SETTINGS.GAMESPEED),
-    blocking = false,
-    func = function()
-        BlackHole.hover_suppressed = nil
-        return true
-    end
-}))
+if not hook then
+    G.E_MANAGER:add_event(Event({
+        trigger = 'after',
+        delay = 2.0*math.sqrt(G.SETTINGS.GAMESPEED),
+        blocking = false,
+        func = function()
+            BlackHole.hover_suppressed = nil
+            return true
+        end
+    })) 
+end
 """
 match_indent = true

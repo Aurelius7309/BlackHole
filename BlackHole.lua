@@ -4,7 +4,7 @@
 --- PREFIX: blh
 --- MOD_AUTHOR: [Aure]
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.2.0
+--- VERSION: 0.2.1
 
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
@@ -39,6 +39,7 @@ local keybind_list = {
     'triggerright',
     'leftshoulder',
     'rightshoulder',
+    'back',
 }
 BlackHole.keybind_lookup = {}
 for i = 1, #keybind_list do
@@ -108,7 +109,7 @@ SMODS.Keybind {
         tts.say(localize {
             type = 'variable',
             key = 'tts_config_keybind',
-            vars = { localize(BlackHole.selected_keybind, 'tts_keybinds'), BlackHole.config.keybinds[BlackHole.selected_keybind] }
+            vars = { localize(BlackHole.selected_keybind, 'tts_keybinds'), BlackHole.config.keybinds[BlackHole.selected_keybind] or localize('k_none') }
         })
     end
 }
@@ -208,7 +209,7 @@ function BlackHole.read_h_popup(popup, node)
                 (has_plus and ' +' or '')
             end
             --TODO this is not always what we want, compare blind reward vs. foil tooltip
-            if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge .. ' -' end
+            -- if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge .. ' -' end
             return text_to_merge
         end
     })
