@@ -85,6 +85,6 @@ payload = "if not G.sticker_card or not G.sticker_card.area or not G.sticker_car
 [[patches]]
 [patches.regex]
 target = "functions/UI_definitions.lua"
-pattern = '''id = '(select_blind|play|discard)_button','''
-position = 'after'
-payload = "force_focus = true, "
+pattern = '''\{id = '(?<but>select_blind|play|discard)_button','''
+position = 'at'
+payload = "{id = '${but}_button', force_focus = true,"
