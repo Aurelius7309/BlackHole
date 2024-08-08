@@ -4,7 +4,7 @@
 --- PREFIX: blh
 --- MOD_AUTHOR: [Aure]
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.3.0
+--- VERSION: 0.3.1
 
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
@@ -480,7 +480,6 @@ function BlackHole.run_setup_controller(button)
                     to_search = text,
                     target = function(to_search) return to_search end,
                     str_manip = function(text_to_merge) 
-                        sendInfoMessage(text_to_merge)
                         if text_to_merge:sub(1,1) == '.' then
                             text_to_merge = text_to_merge:sub(2)
                         end
@@ -495,7 +494,6 @@ function BlackHole.run_setup_controller(button)
     end
     local n = BlackHole.capture_controller
     if n == 1 then
-        if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
         tts.silence()
         BlackHole.capture_controller = 2
         if not G.SETTINGS.tutorial_complete then
@@ -538,7 +536,7 @@ function BlackHole.run_setup_controller(button)
             end
 
             G.SETTINGS.current_setup = 'Continue'
-            G.GAME.viewed_back = Back(get_deck_from_name(G.PROFILES[G.SETTINGS.profile].MEMORY.deck))
+            G.GAME.viewed_back = Back(get_deck_from_name(G.PROFILES[G.SETTINGS.profile].MEMORY.deck) or G.P_CENTERS.b_red)
 
             G.PROFILES[G.SETTINGS.profile].MEMORY.stake = G.PROFILES[G.SETTINGS.profile].MEMORY.stake or 1
             G.viewed_stake = 1
@@ -578,6 +576,7 @@ function BlackHole.run_setup_controller(button)
             local new_idx = BlackHole.viewed_deck_idx - 1
             if new_idx == 0 then new_idx = #G.P_CENTER_POOLS.Back end
             BlackHole.viewed_deck_idx = new_idx
+            G.GAME.viewed_back = G.GAME.viewed_back or Back(G.P_CENTERS.b_red)
             G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[new_idx])
             local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key) or 0
             G.viewed_stake = math.min(G.viewed_stake, max_stake + 1)
@@ -590,6 +589,7 @@ function BlackHole.run_setup_controller(button)
             local new_idx = BlackHole.viewed_deck_idx + 1
             if new_idx == #G.P_CENTER_POOLS.Back+1 then new_idx = 1 end
             BlackHole.viewed_deck_idx = new_idx
+            G.GAME.viewed_back = G.GAME.viewed_back or Back(G.P_CENTERS.b_red)
             G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[new_idx])
             local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key) or 0
             G.viewed_stake = math.min(G.viewed_stake, max_stake + 1)
@@ -599,6 +599,7 @@ function BlackHole.run_setup_controller(button)
             tts.say(BlackHole.read_back_info())
             tts.say(BlackHole.read_stake_info())
         elseif button == 'leftshoulder' then
+            G.GAME.viewed_back = G.GAME.viewed_back or Back(G.P_CENTERS.b_red)
             local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key)
             if G.PROFILES[G.SETTINGS.profile].all_unlocked then max_stake = #G.P_CENTER_POOLS['Stake'] end
             local stake_options = {}
@@ -616,6 +617,7 @@ function BlackHole.run_setup_controller(button)
                 tts.say(BlackHole.read_back_info())
             end
         elseif button == 'rightshoulder' then
+            G.GAME.viewed_back = G.GAME.viewed_back or Back(G.P_CENTERS.b_red)
             local max_stake = get_deck_win_stake(G.GAME.viewed_back.effect.center.key)
             if G.PROFILES[G.SETTINGS.profile].all_unlocked then max_stake = #G.P_CENTER_POOLS['Stake'] end
             local stake_options = {}
@@ -633,6 +635,7 @@ function BlackHole.run_setup_controller(button)
                 tts.say(BlackHole.read_back_info())
             end
         elseif button == 'a' then
+            G.GAME.viewed_back = G.GAME.viewed_back or Back(G.P_CENTERS.b_red)
             if not G.GAME.viewed_back.effect.center.unlocked then 
                 tts.silence()
                 tts.say(localize('tts_locked_deck'))
@@ -641,6 +644,7 @@ function BlackHole.run_setup_controller(button)
             tts.silence()
             tts.say(localize('tts_starting_run'))
             BlackHole.capture_controller = nil
+            if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
         end
     end
