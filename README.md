@@ -35,7 +35,7 @@ Black Hole allows you to play the game solely with your keyboard by emulating co
 - The game features popups with multiple tabs in some places. You can use the bumpers to switch between tabs, but there is no audio output while doing so. If you move down into the menu and back up to the tab selector, it is however possible to know your current selection.
 
 ## Other mods
-- [Nopeus](https://github.com/jenwalter666/Nopeus) is An extension of the MoreSpeeds mod for Balatro, including a new speed which reduces delays in the event manager to 0/near-zero.
+- [Nopeus](https://github.com/jenwalter666/JensBalatroCollection) is An extension of the MoreSpeeds mod for Balatro, including a new speed which reduces delays in the event manager to 0/near-zero.
 - [Achievements Enabler](https://github.com/Steamopollys/Steamodded/blob/main/example_mods/Mods/AchievementsEnabler.lua) is an example mod included with Steamodded that re-enables Steam achievements.
 - [Dimserene's Modpack](https://github.com/Dimserene/Dimserenes-Modpack) includes a large selection of various mods for you to choose from. Depending on their additions, not all mods may be fully accessible.
 ## Credits
