@@ -13,7 +13,8 @@ Black Hole is an accessibility mod for Balatro that adds screen reader support t
 
 ## The keyboard controller
 Black Hole allows you to play the game solely with your keyboard by emulating controller inputs. The default keybinds are listed below. If you want to configure different keybinds, press `3` on the main menu.
-| Controller button | Default key | Usage|
+| Controller button | Default key | Usage |
+| ----------------  | ---- | ---- |
 | D-Pad up          | W | |
 | D-Pad down        | S | |
 | D-Pad left        | A | |
