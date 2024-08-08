@@ -3,7 +3,7 @@ Black Hole is an accessibility mod for Balatro that adds screen reader support t
 
 ## How to install Black Hole
 1. [Install Balatro on Steam](https://store.steampowered.com/app/2379780/Balatro/) if you haven't already. Wait a few seconds for the music to start playing to ensure the save directory is set up correctly, then close the game.
-2. [Create an exclusion] for Balatro in Windows Security. Lovely is incorrectly flagged as malicious, so it will cause issues if you don't disable it.
+2. [Create an exclusion](https://github.com/Steamopollys/Steamodded/wiki/01.-Getting-started#using-windows-defender) for Balatro in Windows Security. Lovely is incorrectly flagged as malicious, so it will cause issues if you don't disable it.
 3. [Install Lovely](https://github.com/ethangreen-dev/lovely-injector?tab=readme-ov-file#windows--proton--wine).
 4. Download the latest source code of [Steamodded](https://github.com/Steamopollys/Steamodded/) using [this direct link](https://github.com/Steamopollys/Steamodded/archive/refs/heads/main.zip). Copy the `Steamodded-main` folder inside the zip file to your clipboard.
 5. Press the Windows key + R and type in `%AppData%/Balatro`. In this folder, create a new directory named `Mods`. Paste the `Steamodded-main` folder from your clipboard here.
