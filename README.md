@@ -2,6 +2,7 @@
 Black Hole is an accessibility mod for Balatro that adds screen reader support to the game. It was tested on Windows with [NVDA](https://www.nvaccess.org/download/). Other screenreaders supported by [Tolk](https://github.com/dkager/tolk) should also work. If no screenreader is detected, Microsoft SAPI 5 will be used instead **(Not recommended)**. Support for default speech voices on macOS is also included, but has not been tested as of yet.
 
 ## How to install Black Hole
+For a complete distribution including Achievements Enabler, Nopeus and an automatic update script, head to the [latest release](https://github.com/Aurelius7309/BlackHole/releases/latest). For a manual installation process, follow the steps below:
 1. [Install Balatro on Steam](https://store.steampowered.com/app/2379780/Balatro/) if you haven't already. Wait a few seconds for the music to start playing to ensure the save directory is set up correctly, then close the game.
 2. [Create an exclusion](https://github.com/Steamopollys/Steamodded/wiki/01.-Getting-started#using-windows-defender) for Balatro in Windows Security. Lovely is incorrectly flagged as malicious, so it will cause issues if you don't disable it.
 3. [Install Lovely](https://github.com/ethangreen-dev/lovely-injector?tab=readme-ov-file#windows--proton--wine).
@@ -35,7 +36,7 @@ Black Hole allows you to play the game solely with your keyboard by emulating co
 - The game features popups with multiple tabs in some places. You can use the bumpers to switch between tabs, but there is no audio output while doing so. If you move down into the menu and back up to the tab selector, it is however possible to know your current selection.
 
 ## Other mods
-- [Nopeus](https://github.com/jenwalter666/JensBalatroCollection) is An extension of the MoreSpeeds mod for Balatro, including a new speed which reduces delays in the event manager to 0/near-zero.
+- [Nopeus](https://github.com/jenwalter666/JensBalatroCollection) is an extension of the MoreSpeeds mod for Balatro, including a new speed which reduces delays in the event manager to 0/near-zero.
 - [Achievements Enabler](https://github.com/Steamopollys/Steamodded/blob/main/example_mods/Mods/AchievementsEnabler.lua) is an example mod included with Steamodded that re-enables Steam achievements.
 - [Dimserene's Modpack](https://github.com/Dimserene/Dimserenes-Modpack) includes a large selection of various mods for you to choose from. Depending on their additions, not all mods may be fully accessible.
 ## Credits
