@@ -4,7 +4,7 @@
 --- PREFIX: blh
 --- MOD_AUTHOR: [Aure]
 --- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.2.1
+--- VERSION: 0.3.0
 
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
@@ -244,8 +244,10 @@ function BlackHole.read_button(node)
         end
     })
     local is_blind_select_button = false
+    local blind_state
     for _, v in ipairs { "Select", "Skipped", "Current", "Defeated", "Upcoming", "Selected" } do
-        if but_text == localize(v, 'blind_states') .. ' ' then
+        blind_state = localize(v, 'blind_states')
+        if but_text == blind_state.. ' ' then
             is_blind_select_button = true; break
         end
     end
@@ -258,6 +260,13 @@ function BlackHole.read_button(node)
                     local has_plus = text_to_merge:match('%+$')
                     text_to_merge = localize('$') ..
                     (text_to_merge:len() - (has_plus and 1 or 0)) .. (has_plus and ' +' or '')
+                end
+                if text_to_merge == blind_state then
+                    text_to_merge = text_to_merge..localize {
+                        type = 'variable',
+                        key = 'tts_ante',
+                        vars = {G.GAME.round_resets.ante},
+                    }
                 end
                 if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
                 local x_base = localize('k_x_base')
@@ -451,11 +460,47 @@ function BlackHole.run_setup_controller(button)
     if button == 'start' then
         BlackHole.capture_controller = nil; return
     end
+    if button == 'x' then
+        tts.silence()
+        for _, v in ipairs {
+            { 'sb_', 4 },
+            { 'fh_', 8 },
+            { 's_' , 12 },
+            { 'bb_', 5 },
+            { 'sh_', 3 }
+        } do
+            for i = 1, v[2] do
+                local text = {}
+                local key = v[1]..i
+                local vars = {}
+                if key == 's_3' then vars = {#G.P_CENTER_POOLS.Joker} end
+                if key == 'bb_5' then vars = {G.GAME.win_ante} end
+                localize { type = 'tutorial', key = key, vars = vars, nodes = text }
+                tts.say(BlackHole.find_strings({
+                    to_search = text,
+                    target = function(to_search) return to_search end,
+                    str_manip = function(text_to_merge) 
+                        sendInfoMessage(text_to_merge)
+                        if text_to_merge:sub(1,1) == '.' then
+                            text_to_merge = text_to_merge:sub(2)
+                        end
+                        return text_to_merge
+                    end
+                }))
+                G.SETTINGS.tutorial_complete = true
+                G.SETTINGS.tutorial_progress = nil
+            end
+        end
+        BlackHole.capture_controller = nil; return
+    end
     local n = BlackHole.capture_controller
     if n == 1 then
+        if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
         tts.silence()
         BlackHole.capture_controller = 2
-        -- remove continue option if starting from run
+        if not G.SETTINGS.tutorial_complete then
+            tts.say(localize('tts_tutorial'))
+        end
         if G.FUNCS.can_continue({ config = { func = true } }) and G.STAGE == G.STAGES.MAIN_MENU then
             tts.say(localize('tts_select_run_choice'))
         else
@@ -596,7 +641,6 @@ function BlackHole.run_setup_controller(button)
             tts.silence()
             tts.say(localize('tts_starting_run'))
             BlackHole.capture_controller = nil
-            if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
         end
     end

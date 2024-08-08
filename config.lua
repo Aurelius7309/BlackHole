@@ -15,5 +15,5 @@ return {
         rightshoulder = 'v',
         back = 'tab',
     },
-    keyboard_controller = false,
+    keyboard_controller = true,
 }
