@@ -12,7 +12,7 @@ const wchar_t * Tolk_DetectScreenReader();
 bool Tolk_HasSpeech();
 bool Tolk_HasBraille();
 bool Tolk_IsSpeaking();]]
-local tolk = ffi.load("Tolk")
+local tolk = ffi.load(BlackHole.path.."bin/tolk.dll")
 tolk.Tolk_Load()
 local function output(s, interrupt)
     interrupt=interrupt or false
