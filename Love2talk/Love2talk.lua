@@ -9,12 +9,7 @@ end
 
 local function say(text, interrupt)
     interrupt=interrupt or false
-    if os=="Windows" then
-        backend.output(text, interrupt)
-    else
-        backend.output(text)
-    end
-    
+    backend.output(text, interrupt)
 end
 
 local function isSpeaking()
