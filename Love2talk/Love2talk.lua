@@ -20,9 +20,12 @@ local function silence()
     return backend.silence()
 end
 local function setRate(rate)
-    backend.setRate(rate)
+    if os =="OS X" then
+        backend.setRate(rate)
+    else
+        return function() end --noop
+    end
 end
-
 return {say=say, isSpeaking=isSpeaking, silence=silence, setRate=setRate}
 
 

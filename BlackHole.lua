@@ -134,22 +134,32 @@ SMODS.Keybind {
     key = 'kc_ratedown',
     key_pressed = '7',
     action = function(controller)
-        BlackHole.config.rate=BlackHole.config.rate-0.05
-        BlackHole:save_config()
-        tts.setRate(BlackHole.config.rate)
-        tts.silence()
-        tts.say(BlackHole.config.rate)
+        if love.system.getOS() == "OS X" then
+            BlackHole.config.rate=BlackHole.config.rate-0.05
+            BlackHole:save_config()
+            tts.setRate(BlackHole.config.rate)
+            tts.silence()
+            tts.say(BlackHole.config.rate)
+        else --Windows
+            tts.silence()
+            tts.say("Command not supported on Windows")
+        end
     end
 }
 SMODS.Keybind {
     key = 'kc_rateup',
     key_pressed = '8',
     action = function(controller)
-        BlackHole.config.rate=BlackHole.config.rate+0.05
-        BlackHole:save_config()
-        tts.setRate(BlackHole.config.rate)
-        tts.silence()
-        tts.say(BlackHole.config.rate)
+        if love.system.getOS() == "OS X" then
+            BlackHole.config.rate=BlackHole.config.rate+0.05
+            BlackHole:save_config()
+            tts.setRate(BlackHole.config.rate)
+            tts.silence()
+            tts.say(BlackHole.config.rate)
+        else --Windows
+            tts.silence()
+            tts.say("Command not supported on Windows")
+        end
     end
 }
 
