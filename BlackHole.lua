@@ -20,6 +20,7 @@ tts = SMODS.load_file('Love2talk/Love2talk.lua')()
 G.E_MANAGER:add_event(Event {
     func = function()
         if SMODS.booted then
+            tts.setRate(BlackHole.config.rate)
             tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { VERSION, BlackHole.version, MODDED_VERSION:gsub('-STEAMODDED', '') } })
             return true
         end
@@ -129,8 +130,32 @@ SMODS.Keybind {
     end
 }
 
+SMODS.Keybind {
+    key = 'kc_ratedown',
+    key_pressed = '7',
+    action = function(controller)
+        BlackHole.config.rate=BlackHole.config.rate-0.05
+        BlackHole:save_config()
+        tts.setRate(BlackHole.config.rate)
+        tts.silence()
+        tts.say(BlackHole.config.rate)
+    end
+}
+SMODS.Keybind {
+    key = 'kc_rateup',
+    key_pressed = '8',
+    action = function(controller)
+        BlackHole.config.rate=BlackHole.config.rate+0.05
+        BlackHole:save_config()
+        tts.setRate(BlackHole.config.rate)
+        tts.silence()
+        tts.say(BlackHole.config.rate)
+    end
+}
+
+
 BlackHole.reserved_keys = {}
-for i = 1, 6 do BlackHole.reserved_keys['' .. i] = true end
+for i = 1, 8 do BlackHole.reserved_keys['' .. i] = true end
 
 -- "to_search" is table of where to start the search
 -- "target" is function returning where to start search,

@@ -19,8 +19,11 @@ end
 local function silence()
     return backend.silence()
 end
+local function setRate(rate)
+    backend.setRate(rate)
+end
 
-return {say=say, isSpeaking=isSpeaking, silence=silence}
+return {say=say, isSpeaking=isSpeaking, silence=silence, setRate=setRate}
 
 
 
