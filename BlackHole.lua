@@ -136,6 +136,7 @@ SMODS.Keybind {
     action = function(controller)
         if love.system.getOS() == "OS X" then
             BlackHole.config.rate=BlackHole.config.rate-0.05
+            if BlackHole.config.rate<0.1 then BlackHole.config.rate=0.1 end
             BlackHole:save_config()
             tts.setRate(BlackHole.config.rate)
             tts.silence()
@@ -152,6 +153,7 @@ SMODS.Keybind {
     action = function(controller)
         if love.system.getOS() == "OS X" then
             BlackHole.config.rate=BlackHole.config.rate+0.05
+            if BlackHole.config.rate>1 then BlackHole.config.rate=1 end
             BlackHole:save_config()
             tts.setRate(BlackHole.config.rate)
             tts.silence()
