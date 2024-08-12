@@ -16,4 +16,5 @@ return {
         back = 'tab',
     },
     keyboard_controller = true,
+    rate=0.5,
 }
