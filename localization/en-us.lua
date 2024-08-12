@@ -1,12 +1,14 @@
 return {
     misc = {
         v_dictionary = {
-            tts_welcome = [[Welcome to Balatro #1#! Using Black Hole version #2#, Steamodded version #3#. Press Y to start the game. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. ]],
+            tts_welcome = [[Welcome to Balatro #1#! Using Black Hole version #2#, Steamodded version #3#. Press Y to start the game. Press 1 to read this message again. Press 2 to change the game speed. Press 3 to setup the keyboard controller. If you are playing on a Mac, press 7 and 8 to adjust the speech rate.]],
             tts_config_keybind = [[The keybind for #1# is set to #2# ... Press 6 to assign a new key. Press 5 to configure the next keybind. ]],
             tts_assign_keybind = [[Please press the key to bind to #1#. ]],
             tts_invalid_key = [[Key #1# is reserved for Black Hole configuration. Please enter a different key. ]],
             tts_confirm_continue = [[Press A to continue this run: #1#, Round #2#, Ante #3#, Money: #4#, Best Hand: #5#. ]],
             tts_game_speed = [[Changed the game speed to #1#. ]],
+            tts_rate = [[Speech rate changed to #1#%.]],
+            tts_rate_unsupported = [[This command is not supported on Windows. Adjust the speech rate in your screen reader's settings or the Windows control panel.]],
             tts_highlighted = [[Selected #1#]],
             tts_hand_eval = [[#1#, level #2#. #3# X #4# ]],
             tts_played_this_run = [[(played #1# #2# this run). ]],

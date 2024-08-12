@@ -140,10 +140,10 @@ SMODS.Keybind {
             BlackHole:save_config()
             tts.setRate(BlackHole.config.rate)
             tts.silence()
-            tts.say(BlackHole.config.rate)
+            tts.say(localize { type = 'variable', key = 'tts_rate', vars = { BlackHole.config.rate*100 } })
         else --Windows
             tts.silence()
-            tts.say("Command not supported on Windows")
+            tts.say(localize('tts_rate_unsupported'))
         end
     end
 }
@@ -157,10 +157,10 @@ SMODS.Keybind {
             BlackHole:save_config()
             tts.setRate(BlackHole.config.rate)
             tts.silence()
-            tts.say(BlackHole.config.rate)
+            tts.say(localize { type = 'variable', key = 'tts_rate', vars = { BlackHole.config.rate*100 } })
         else --Windows
             tts.silence()
-            tts.say("Command not supported on Windows")
+            tts.say(localize('tts_rate_unsupported'))
         end
     end
 }
