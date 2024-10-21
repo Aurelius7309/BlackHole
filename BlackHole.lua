@@ -679,7 +679,6 @@ function BlackHole.play_joker_notif(card, first)
             trigger = 'before',
             delay = 2,
             func = function() 
-                print("hii mom")
                 play_sound(sound.key)
                 return true
             end
