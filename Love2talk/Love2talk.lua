@@ -9,12 +9,7 @@ end
 
 local function say(text, interrupt)
     interrupt=interrupt or false
-    if os=="Windows" then
-        backend.output(text, interrupt)
-    else
-        backend.output(text)
-    end
-    
+    backend.output(text, interrupt)
 end
 
 local function isSpeaking()
@@ -24,8 +19,14 @@ end
 local function silence()
     return backend.silence()
 end
-
-return {say=say, isSpeaking=isSpeaking, silence=silence}
+local function setRate(rate)
+    if os =="OS X" then
+        backend.setRate(rate)
+    else
+        return function() end --noop
+    end
+end
+return {say=say, isSpeaking=isSpeaking, silence=silence, setRate=setRate}
 
 
 

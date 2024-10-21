@@ -1,5 +1,5 @@
 # Black Hole - Accessibility/Screenreader mod for Balatro
-Black Hole is an accessibility mod for Balatro that adds screen reader support to the game. It was tested on Windows with [NVDA](https://www.nvaccess.org/download/). Other screenreaders supported by [Tolk](https://github.com/dkager/tolk) should also work. If no screenreader is detected, Microsoft SAPI 5 will be used instead **(Not recommended)**. Support for default speech voices on macOS is also included, but has not been tested as of yet.
+Black Hole is an accessibility mod for Balatro that adds screen reader support to the game. It was tested on Windows with [NVDA](https://www.nvaccess.org/download/). Other screenreaders supported by [Tolk](https://github.com/dkager/tolk) should also work. If no screenreader is detected, Microsoft SAPI 5 will be used instead **(Not recommended)**. Support for default speech voices on macOS is also included.
 
 ## How to install Black Hole
 For a complete distribution including Achievements Enabler, Nopeus and an automatic update script, head to the [latest release](https://github.com/Aurelius7309/BlackHole/releases/latest). For a manual installation process, follow the steps below:
