@@ -13,7 +13,7 @@ position = "after"
 payload = """
 card.tts = ''
 if AUT.name and type(AUT.name) == 'table' then
-    if AUT.name[1].config.object then
+    if ((AUT.name[1] or {}).config or {}).object then
         card.tts = card.tts..AUT.name[1].config.object.string.. ' - '
     else
         local name_text = ''

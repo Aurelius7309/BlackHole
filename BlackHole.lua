@@ -1,11 +1,3 @@
---- STEAMODDED HEADER
---- MOD_NAME: Black Hole
---- MOD_ID: BlackHole
---- PREFIX: blh
---- MOD_AUTHOR: [Aure]
---- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.3.1
-
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
     SMODS.save_mod_config(self)

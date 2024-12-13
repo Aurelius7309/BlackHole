@@ -73,7 +73,7 @@ G.E_MANAGER:add_event(Event({
             for k, card in ipairs(cards) do
                 local AUT = card:generate_UIBox_ability_table()
                 if AUT.name and type(AUT.name) == 'table' then
-                    if AUT.name[1].config.object then
+                    if ((AUT.name[1] or {}).config or {}).object then
                         card_names = card_names..AUT.name[1].config.object.string.. ' - '
                     else
                         local name_text = ''
