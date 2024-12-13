@@ -271,7 +271,7 @@ function BlackHole.read_button(node)
                 if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
-                if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
+                --if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
                 return text_to_merge
             end
         })
