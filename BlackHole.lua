@@ -165,6 +165,31 @@ SMODS.Keybind {
     end
 }
 
+SMODS.Keybind {
+    key = 'tts_sounds',
+    key_pressed = '0',
+    action = function(controller)
+        tts.silence()
+        if BlackHole.config.additional_sounds then
+            BlackHole.config.additional_sounds = false
+            tts.say(localize('tts_additional_sounds_off'))
+        else
+            BlackHole.config.additional_sounds = true
+            tts.say(localize('tts_additional_sounds_on'))
+        end
+        BlackHole:save_config()
+    end
+}
+
+local beep_sound = SMODS.Sound {
+    key = 'beep',
+    path = 'beep.ogg'
+}
+beep = function(per, vol)
+    if not BlackHole.config.additional_sounds then return end
+    play_sound(beep_sound.key, per, vol)
+end
+
 
 BlackHole.reserved_keys = {}
 for i = 1, 8 do BlackHole.reserved_keys['' .. i] = true end
@@ -226,6 +251,21 @@ function BlackHole.process_hover(controller)
                 localize('tts_face_down_card')
         end
         tts.say(node.tts)
+        if node.area then
+            local idx
+            for i,v in ipairs(node.area.cards) do
+                if v==node then
+                    idx = i
+                    break
+                end
+            end
+            local pentatonic = function(x)
+                local rem = (x%5)+1
+                local pows = {0, 2, 5, 7, 9}
+                return math.pow(2, math.floor(x/5) + pows[rem]/12)
+            end
+            if idx then beep(pentatonic(idx)/3.25, 0.6) end -- magic number to put sound in tune with game music
+        end
         BlackHole.last_tts_node = node
         BlackHole.hover_time_elapsed = 0
     else
@@ -492,6 +532,16 @@ function BlackHole.read_stake_info()
     local desc_text = table.concat(localize { type = 'raw_descriptions', set = 'Stake', key = stake.key }, ' ')
     return name_text .. ' - ' .. desc_text
 end
+function BlackHole.read_chal_info(id)
+    id = id or 1
+    local challenge = G.CHALLENGES[id]
+    local name = localize(challenge.id, 'challenge_names')
+    local rules_text = BlackHole.find_strings({
+        to_search = G.UIDEF.challenge_description_tab({_id = id, _tab = 'Rules'}),
+        target = function(to_search) return to_search.nodes end,
+    })
+    return name .. ' - ' .. rules_text
+end
 
 function BlackHole.run_setup_controller(button)
     if button == 'start' then
@@ -599,6 +649,24 @@ function BlackHole.run_setup_controller(button)
                 }
             })
             BlackHole.capture_controller = 3
+        elseif button == 'y' then
+            tts.silence()
+            if G.PROFILES[G.SETTINGS.profile].all_unlocked then G.PROFILES[G.SETTINGS.profile].challenges_unlocked = #G.CHALLENGES end
+            if not G.PROFILES[G.SETTINGS.profile].challenges_unlocked then
+                local deck_wins = 0
+                for k, v in pairs(G.PROFILES[G.SETTINGS.profile].deck_usage) do
+                    if v.wins and v.wins[1] then
+                        deck_wins = deck_wins + 1
+                    end
+                end
+                tts.say(localize{type = 'variable', key = 'tts_challenge_locked', vars = {G.CHALLENGE_WINS, deck_wins}})
+                return
+            end
+            G.run_setup_seed = nil
+            BlackHole.selected_chal = 1
+            tts.say(localize('tts_init_chal_select'))
+            tts.say(BlackHole.read_chal_info(1))
+            BlackHole.capture_controller = 5
         end
     elseif n == 3 then
         if button == 'a' then
@@ -683,6 +751,23 @@ function BlackHole.run_setup_controller(button)
             BlackHole.capture_controller = nil
             if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
+        end
+    elseif n == 5 then
+        if button == 'dpleft' then
+            BlackHole.selected_chal = BlackHole.selected_chal - 1
+            if BlackHole.selected_chal == 0 then BlackHole.selected_chal = G.PROFILES[G.SETTINGS.profile].challenges_unlocked end
+            tts.silence()
+            tts.say(BlackHole.read_chal_info(BlackHole.selected_chal))
+        elseif button == 'dpright' then
+            BlackHole.selected_chal = BlackHole.selected_chal + 1
+            if BlackHole.selected_chal == G.PROFILES[G.SETTINGS.profile].challenges_unlocked+1 then BlackHole.selected_chal = 1 end
+            tts.silence()
+            tts.say(BlackHole.read_chal_info(BlackHole.selected_chal))
+        elseif button == 'a' then
+            tts.silence()
+            tts.say(localize('tts_starting_chal'))
+            BlackHole.capture_controller = nil
+            G.FUNCS.start_challenge_run({config = { id = BlackHole.selected_chal}})
         end
     end
 end
