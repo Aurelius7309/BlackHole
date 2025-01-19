@@ -1,12 +1,13 @@
 return {
     misc = {
         v_dictionary = {
-            tts_welcome = [[Ti diamo il benvenuto in Balatro #1#! Stai usando Black Hole versione #2#, Steamodded versione #3#. Premi Y per avviare il gioco. Premi 1 per rileggere questo messaggio. Premi 2 per cambiare la velocità del gioco. Premi 3 per configurare il controller della tastiera. ]],
+            tts_welcome = [[Ti diamo il benvenuto in Balatro #1#! Stai usando Black Hole versione #2#, Steamodded versione #3#. Premi Y per avviare il gioco. Premi 1 per rileggere questo messaggio. Premi 2 per cambiare la velocità del gioco. Premi 3 per configurare il controller della tastiera. Premi 0 per attivare/disattivare i suoni aggiuntivi. Se stai giocando su un Mac, premi 7 e 8 per regolare la velocità di lettura. ]],
             tts_config_keybind = [[Il tasto assegnato a #1# è impostato su #2#... Premi 6 per assegnare un nuovo tasto. Premi 5 per configurare il prossimo tasto assegnato. ]],
             tts_assign_keybind = [[Premi il tasto da assegnare a #1#. ]],
             tts_invalid_key = [[Il tasto #1# è riservato per la configurazione di Black Hole. Inserisci un tasto diverso. ]],
             tts_confirm_continue = [[Premi A per continuare questa partita: #1#, Round #2#, Ante #3#, Soldi: #4#, Mano Migliore: #5#. ]],
-            tts_game_speed = [[La velocità del gioco è stata cambiata a #1#. ]],
+            tts_game_speed = [[Velocità del gioco impostata a #1#. ]],
+            tts_rate = [[Velocità della voce impostata a #1#%.]],
             tts_highlighted = [[Selezionato #1#]],
             tts_hand_eval = [[#1#, livello #2#. #3# per #4# ]],
             tts_played_this_run = [[(giocato #1# #2# in questa partita). ]],
@@ -19,6 +20,7 @@ return {
             tts_card_sell = [[Vendi: $#1#. ]],
             tts_current_money = [[Saldo: $#1#. ]],
             tts_ante = [[Ante #1# ]],
+            tts_challenge_locked = [[La modalità sfida è bloccata. Vinci una partita con almeno #1# mazzi diversi per sbloccarla (attualmente #2#). ]],
         },
         dictionary = {
             tts_time = 'volta',
@@ -33,14 +35,19 @@ return {
             tts_blind_defeated = [[Buio sconfitto. ]],
             tts_kc_off = [[Il controller della tastiera è disabilitato. Premi 4 per abilitarlo. ]],
             tts_kc_on = [[Il controller della tastiera è abilitato. Premi 4 per disabilitarlo. Premi 5 per personalizzare i tasti assegnati. ]],
+            tts_rate_unsupported = [[Questo comando non è supportato su Windows. Regola la velocità del parlato nel tuo screen reader o nel Pannello di controllo di Windows. ]],
             tts_skip_blind = "Salta Buio per - ",
             tts_tutorial = [[Premi X per iniziare il tutorial. Premi A per iniziare una nuova partita. ]],
-            tts_select_run_choice = [[Premi A per iniziare una nuova partita. Premi B per continuare la tua partita. Premi Start per annullare. ]],
-            tts_continuing_run = [[Continuando la tua partita. ]],
-            tts_starting_run = [[Iniziando la tua partita. ]],
-            tts_init_deck_select = [[Usa i pulsanti Sinistra e Destra del D-Pad per selezionare un mazzo. Usa i grilletti superiori per selezionare una puntata. Premi A per iniziare la tua partita quando sei pronto. Premi Start per annullare. Premi X per riavviare il tutorial. ]],
+            tts_select_run_choice = [[Premi A per iniziare una nuova partita. Premi B per continuare la tua partita. Premi Y per iniziare una sfida. Premi Start per annullare. ]],
+            tts_continuing_run = [[Continuando la partita. ]],
+            tts_starting_run = [[Iniziando la partita. ]],
+            tts_starting_chal = [[Iniziando la sfida. ]],
+            tts_init_deck_select = [[Usa i pulsanti Sinistra e Destra del D-Pad per selezionare un mazzo. Usa i grilletti superiori per selezionare una puntata. Premi A per iniziare la tua partita. Premi Start per annullare. Premi X per riavviare il tutorial. ]],
+            tts_init_chal_select = [[Usa i pulsanti Sinistra e Destra del D-Pad per selezionare una sfida. Premi A per avviare la sfida. Premi Start per annullare. ]],
             tts_locked_deck = [[Questo mazzo è bloccato. Per giocarlo, prima soddisfa la condizione di sblocco. ]],
-            tts_new_run = [[Premi Y per iniziare una nuova partita. ]]
+            tts_new_run = [[Premi Y per iniziare una nuova partita. ]],
+            tts_additional_sounds_on = [[I suoni aggiuntivi sono abilitati. Premi 0 per disabilitarli. ]],
+            tts_additional_sounds_off= [[I suoni aggiuntivi sono disabilitati. Premi 0 per abilitarli. ]],
         },
         tts_keybinds = {
             dpleft = 'D-Pad sinistra',
