@@ -1,5 +1,5 @@
 # Black Hole - Accessibility/Screenreader mod for Balatro
-Black Hole is an accessibility mod for Balatro that adds screen reader support to the game. It was tested on Windows with [NVDA](https://www.nvaccess.org/download/). Other screenreaders supported by [Tolk](https://github.com/dkager/tolk) should also work. If no screenreader is detected, Microsoft SAPI 5 will be used instead **(Not recommended)**. Support for default speech voices on macOS is also included, but has not been tested as of yet.
+Black Hole is an accessibility mod for Balatro that adds screen reader support to the game. It was tested on Windows with [NVDA](https://www.nvaccess.org/download/). Other screenreaders supported by [Tolk](https://github.com/dkager/tolk) should also work. If no screenreader is detected, Microsoft SAPI 5 will be used instead **(Not recommended)**. Support for default speech voices on macOS is also included.
 
 ## How to install Black Hole
 For a complete distribution including Achievements Enabler, Nopeus and an automatic update script, head to the [latest release](https://github.com/Aurelius7309/BlackHole/releases/latest). For a manual installation process, follow the steps below:
@@ -9,7 +9,8 @@ For a complete distribution including Achievements Enabler, Nopeus and an automa
 4. Download the latest source code of [Steamodded](https://github.com/Steamopollys/Steamodded/) using [this direct link](https://github.com/Steamopollys/Steamodded/archive/refs/heads/main.zip). Copy the `Steamodded-main` folder inside the zip file to your clipboard.
 5. Press the Windows key + R and type in `%AppData%/Balatro`. In this folder, create a new directory named `Mods`. Paste the `Steamodded-main` folder from your clipboard here.
 6. Download the [latest source code of Black Hole](https://github.com/Aurelius7309/BlackHole/archive/refs/heads/main.zip) as well as any other mods you wish to install and add them to your Mods folder.
-7. Launch the game!
+7. If you are using NVDA (recommended): Copy `nvdaControllerClient64.dll` from the `bin` folder inside Black Hole and paste it into the same directory where you placed `version.dll` earlier.
+8. Launch the game!
 
 ## The keyboard controller
 Black Hole allows you to play the game solely with your keyboard by emulating controller inputs. The default keybinds are listed below. If you want to configure different keybinds, press `3` on the main menu.

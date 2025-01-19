@@ -1,11 +1,3 @@
---- STEAMODDED HEADER
---- MOD_NAME: Black Hole
---- MOD_ID: BlackHole
---- PREFIX: blh
---- MOD_AUTHOR: [Aure]
---- MOD_DESCRIPTION: Screen reader mod for Balatro.
---- VERSION: 0.3.1
-
 BlackHole = SMODS.current_mod
 BlackHole.save_config = function(self)
     SMODS.save_mod_config(self)
@@ -20,6 +12,7 @@ tts = SMODS.load_file('Love2talk/Love2talk.lua')()
 G.E_MANAGER:add_event(Event {
     func = function()
         if SMODS.booted then
+            tts.setRate(BlackHole.config.rate)
             tts.say(localize { type = 'variable', key = 'tts_welcome', vars = { VERSION, BlackHole.version, MODDED_VERSION:gsub('-STEAMODDED', '') } })
             return true
         end
@@ -129,8 +122,69 @@ SMODS.Keybind {
     end
 }
 
+SMODS.Keybind {
+    key = 'kc_ratedown',
+    key_pressed = '7',
+    action = function(controller)
+        if love.system.getOS() == "OS X" then
+            BlackHole.config.rate=BlackHole.config.rate-0.05
+            if BlackHole.config.rate<0.1 then BlackHole.config.rate=0.1 end
+            BlackHole:save_config()
+            tts.setRate(BlackHole.config.rate)
+            tts.silence()
+            tts.say(localize { type = 'variable', key = 'tts_rate', vars = { BlackHole.config.rate*100 } })
+        else --Windows
+            tts.silence()
+            tts.say(localize('tts_rate_unsupported'))
+        end
+    end
+}
+SMODS.Keybind {
+    key = 'kc_rateup',
+    key_pressed = '8',
+    action = function(controller)
+        if love.system.getOS() == "OS X" then
+            BlackHole.config.rate=BlackHole.config.rate+0.05
+            if BlackHole.config.rate>1 then BlackHole.config.rate=1 end
+            BlackHole:save_config()
+            tts.setRate(BlackHole.config.rate)
+            tts.silence()
+            tts.say(localize { type = 'variable', key = 'tts_rate', vars = { BlackHole.config.rate*100 } })
+        else --Windows
+            tts.silence()
+            tts.say(localize('tts_rate_unsupported'))
+        end
+    end
+}
+
+SMODS.Keybind {
+    key = 'tts_sounds',
+    key_pressed = '0',
+    action = function(controller)
+        tts.silence()
+        if BlackHole.config.additional_sounds then
+            BlackHole.config.additional_sounds = false
+            tts.say(localize('tts_additional_sounds_off'))
+        else
+            BlackHole.config.additional_sounds = true
+            tts.say(localize('tts_additional_sounds_on'))
+        end
+        BlackHole:save_config()
+    end
+}
+
+local beep_sound = SMODS.Sound {
+    key = 'beep',
+    path = 'beep.ogg'
+}
+beep = function(per, vol)
+    if not BlackHole.config.additional_sounds then return end
+    play_sound(beep_sound.key, per, vol)
+end
+
+
 BlackHole.reserved_keys = {}
-for i = 1, 6 do BlackHole.reserved_keys['' .. i] = true end
+for i = 1, 8 do BlackHole.reserved_keys['' .. i] = true end
 
 -- "to_search" is table of where to start the search
 -- "target" is function returning where to start search,
@@ -189,6 +243,21 @@ function BlackHole.process_hover(controller)
                 localize('tts_face_down_card')
         end
         tts.say(node.tts)
+        if node.area then
+            local idx
+            for i,v in ipairs(node.area.cards) do
+                if v==node then
+                    idx = i
+                    break
+                end
+            end
+            local pentatonic = function(x)
+                local rem = (x%5)+1
+                local pows = {0, 2, 5, 7, 9}
+                return math.pow(2, math.floor(x/5) + pows[rem]/12)
+            end
+            if idx then beep(pentatonic(idx)/3.25, 0.6) end -- magic number to put sound in tune with game music
+        end
         BlackHole.last_tts_node = node
         BlackHole.hover_time_elapsed = 0
     else
@@ -271,7 +340,7 @@ function BlackHole.read_button(node)
                 if string.find(text_to_merge, '%d[%d%+]$') then text_to_merge = text_to_merge .. ' - ' end
                 local x_base = localize('k_x_base')
                 if text_to_merge:sub(-#x_base) == x_base then text_to_merge = text_to_merge..' - ' end
-                if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
+                --if text_to_merge:match(localize('b_skip_blind')) then text_to_merge = localize('tts_skip_blind') end
                 return text_to_merge
             end
         })
@@ -351,32 +420,53 @@ function BlackHole.read_button(node)
             vars = { poker_hand_info.played, localize('tts_time' .. (poker_hand_info.played ~= 1 and 's' or '')) }
         }
     end
+
     local function check_parents(node, uie_id)
         if node:is(UIBox) and node:get_UIE_by_ID(uie_id) then return node:get_UIE_by_ID(uie_id)
         elseif node.parent then return check_parents(node.parent, uie_id) 
         else return nil end
     end
+
+    local function is_ancestor(ancestor_node, child_node)
+        while child_node do
+            if child_node == ancestor_node then
+                return true
+            end
+            child_node = child_node.parent
+        end
+        return false
+    end
+
     local node_with_tag_container = check_parents(node, 'tag_container')
-    if node_with_tag_container and but_text:match(localize('b_skip_blind')) then
-        -- TODO: un-scuff, assuming you even can
-        local tag, tag_sprite = node_with_tag_container.children[2].children[2].Mid.config.ref_table, node_with_tag_container.children[2].children[2].Mid.config.ref_table.tag_sprite
-        local tag_tts, tag_AUT = '', tag_sprite.ability_UIBox_table
-        if tag_AUT == nil then tag:get_uibox_table(tag_sprite); tag_AUT = tag_sprite.ability_UIBox_table end
+
+    -- We have to check if it's an ancestor, otherwise by focusing on the blind boss the small blind tag is read. There's probably a better way to do it
+    if node_with_tag_container and is_ancestor(node_with_tag_container, node) then
+        local tag_container = node_with_tag_container.children[2]
+        local tag_ui_box = tag_container.children[2]
+        local tag = tag_ui_box.Mid.config.ref_table
+        local tag_sprite = tag.tag_sprite
+        tag:get_uibox_table(tag_sprite)
+        local tag_AUT = tag_sprite.ability_UIBox_table
+        local tag_tts = ''
 
         if tag_AUT.name and type(tag_AUT.name) == 'table' then
             if tag_AUT.name[1].config.object then
-                tag_tts = tag_tts..tag_AUT.name[1].config.object.string.. ' - '
+                tag_tts = tag_tts .. tag_AUT.name[1].config.object.string .. ' - '
             else
                 local name_text = ''
                 for _, v in ipairs(tag_AUT.name) do
-                    if v.config and type(v.config.text) == 'string' then name_text = name_text..v.config.text end
+                    if v.config and type(v.config.text) == 'string' then
+                        name_text = name_text .. v.config.text
+                    end
                 end
                 tag_tts = tag_tts .. name_text .. ' - '
             end
         end
+
         local desc_text = ''
         for _, v in ipairs(tag_AUT.main) do
-            desc_text = desc_text..BlackHole.find_strings({to_search = v,
+            desc_text = desc_text .. BlackHole.find_strings({
+                    to_search = v,
                 search_params = {
                     override = true,
                     search = function(to_search, text_to_merge)
@@ -395,15 +485,14 @@ function BlackHole.read_button(node)
                         return text_to_merge
                     end
                 }
-            })..' '
+            }) .. ' '
         end
-        tag_tts = tag_tts..desc_text..'- '
+        tag_tts = tag_tts .. desc_text .. '- '
 
         for _, v in ipairs(tag_AUT.info) do
-            tag_tts = tag_tts..v.name..' - '
-
-            local tooltip_desc_text = ""
-            tooltip_desc_text = BlackHole.find_strings({to_search = v,
+            tag_tts = tag_tts .. v.name .. ' - '
+            local tooltip_desc_text = BlackHole.find_strings({
+                to_search = v,
                 search_params = {
                     search = function(to_search, text_to_merge)
                         if to_search.nodes and to_search.nodes[1] and to_search.nodes[1].config and type(to_search.nodes[1].config.text) == 'string' then
@@ -414,18 +503,20 @@ function BlackHole.read_button(node)
                 },
                 str_manip = function(text_to_merge)
                     if text_to_merge:match('^%$+%+$') then
-                        text_to_merge = localize('$')..(text_to_merge:len() - 1)..' +'
+                        text_to_merge = localize('$') .. (text_to_merge:len() - 1) .. ' +'
                     end
-                    if string.find(text_to_merge, '[%d%+]$') then text_to_merge = text_to_merge..' -' end
+                    if string.find(text_to_merge, '[%d%+]$') then
+                        text_to_merge = text_to_merge .. ' -'
+                    end
                     return text_to_merge
                 end
             })
-
-            tag_tts = tag_tts..tooltip_desc_text .. ' - '
+            tag_tts = tag_tts .. tooltip_desc_text .. ' - '
         end
 
-        but_text = but_text..tag_tts
+        but_text = but_text .. tag_tts
     end
+
     if but_text ~= '' then
         if not q then tts.silence() end
         tts.say(but_text)
@@ -454,6 +545,16 @@ function BlackHole.read_stake_info()
     local name_text = localize { type = 'name_text', set = 'Stake', key = stake.key }
     local desc_text = table.concat(localize { type = 'raw_descriptions', set = 'Stake', key = stake.key }, ' ')
     return name_text .. ' - ' .. desc_text
+end
+function BlackHole.read_chal_info(id)
+    id = id or 1
+    local challenge = G.CHALLENGES[id]
+    local name = localize(challenge.id, 'challenge_names')
+    local rules_text = BlackHole.find_strings({
+        to_search = G.UIDEF.challenge_description_tab({_id = id, _tab = 'Rules'}),
+        target = function(to_search) return to_search.nodes end,
+    })
+    return name .. ' - ' .. rules_text
 end
 
 function BlackHole.run_setup_controller(button)
@@ -562,6 +663,24 @@ function BlackHole.run_setup_controller(button)
                 }
             })
             BlackHole.capture_controller = 3
+        elseif button == 'y' then
+            tts.silence()
+            if G.PROFILES[G.SETTINGS.profile].all_unlocked then G.PROFILES[G.SETTINGS.profile].challenges_unlocked = #G.CHALLENGES end
+            if not G.PROFILES[G.SETTINGS.profile].challenges_unlocked then
+                local deck_wins = 0
+                for k, v in pairs(G.PROFILES[G.SETTINGS.profile].deck_usage) do
+                    if v.wins and v.wins[1] then
+                        deck_wins = deck_wins + 1
+                    end
+                end
+                tts.say(localize{type = 'variable', key = 'tts_challenge_locked', vars = {G.CHALLENGE_WINS, deck_wins}})
+                return
+            end
+            G.run_setup_seed = nil
+            BlackHole.selected_chal = 1
+            tts.say(localize('tts_init_chal_select'))
+            tts.say(BlackHole.read_chal_info(1))
+            BlackHole.capture_controller = 5
         end
     elseif n == 3 then
         if button == 'a' then
@@ -646,6 +765,23 @@ function BlackHole.run_setup_controller(button)
             BlackHole.capture_controller = nil
             if G.STATE == G.STATES.SPLASH then G:main_menu(true) end
             G.FUNCS.start_setup_run()
+        end
+    elseif n == 5 then
+        if button == 'dpleft' then
+            BlackHole.selected_chal = BlackHole.selected_chal - 1
+            if BlackHole.selected_chal == 0 then BlackHole.selected_chal = G.PROFILES[G.SETTINGS.profile].challenges_unlocked end
+            tts.silence()
+            tts.say(BlackHole.read_chal_info(BlackHole.selected_chal))
+        elseif button == 'dpright' then
+            BlackHole.selected_chal = BlackHole.selected_chal + 1
+            if BlackHole.selected_chal == G.PROFILES[G.SETTINGS.profile].challenges_unlocked+1 then BlackHole.selected_chal = 1 end
+            tts.silence()
+            tts.say(BlackHole.read_chal_info(BlackHole.selected_chal))
+        elseif button == 'a' then
+            tts.silence()
+            tts.say(localize('tts_starting_chal'))
+            BlackHole.capture_controller = nil
+            G.FUNCS.start_challenge_run({config = { id = BlackHole.selected_chal}})
         end
     end
 end

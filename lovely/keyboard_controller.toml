@@ -50,7 +50,7 @@ pattern = '''function love\.gamepadpressed\(joystick, button\)
 '''
 position = "after"
 payload = """
-if (G.STAGE == G.STAGES.MAIN_MENU or G.SETTINGS.paused) and button == 'y' then
+if (G.STAGE == G.STAGES.MAIN_MENU or G.SETTINGS.paused) and button == 'y' and not BlackHole.capture_controller then
     BlackHole.capture_controller = 1
 end
 if BlackHole.capture_controller then
