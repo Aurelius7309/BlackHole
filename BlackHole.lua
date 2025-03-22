@@ -203,7 +203,14 @@ function BlackHole.find_strings(t)
             elseif v.config and type(v.config.text) == 'string' then
                 text_to_merge = "" .. v.config.text
             elseif v.config and v.config.object and v.config.object.string then
-                text_to_merge = ""..v.config.object.string
+                if type(v.config.object.string) == 'table' then
+                    text_to_merge = ""
+                    for _,vv in pairs(v.config.object.string) do
+                        text_to_merge = text_to_merge .. vv .. ' '
+                    end
+                else
+                    text_to_merge = ""..v.config.object.string
+                end
             elseif search_params.search and type(search_params.search) == "function" and search_params.search(v, text_to_merge) ~= nil then
                 text_to_merge = ""..search_params.search(v, text_to_merge)
             end
@@ -451,7 +458,14 @@ function BlackHole.read_button(node)
 
         if tag_AUT.name and type(tag_AUT.name) == 'table' then
             if tag_AUT.name[1].config.object then
-                tag_tts = tag_tts .. tag_AUT.name[1].config.object.string .. ' - '
+                if type(tag_AUT.name[1].config.object.string) == 'table' then
+                    for _,vv in pairs(tag_AUT.name[1].config.object.string) do
+                        tag_tts = tag_tts .. vv .. ' '
+                    end
+                    tag_tts = tag_tts .. '- '
+                else
+                    tag_tts = tag_tts .. tag_AUT.name[1].config.object.string .. ' - '
+                end
             else
                 local name_text = ''
                 for _, v in ipairs(tag_AUT.name) do
@@ -475,7 +489,10 @@ function BlackHole.read_button(node)
                         elseif to_search.config and to_search.config.object and to_search.config.object.string then
                             local str = to_search.config.object.string
                             if type(str) == 'table' then
-                                text_to_merge = table.concat(str, ' ')
+                                text_to_merge = ''
+                                for _,vv in pairs(str) do
+                                    text_to_merge = text_to_merge .. vv .. ' '
+                                end
                             else
                                 text_to_merge = str
                             end

@@ -13,8 +13,16 @@ position = "after"
 payload = """
 card.tts = ''
 if AUT.name and type(AUT.name) == 'table' then
-    if ((AUT.name[1] or {}).config or {}).object then
-        card.tts = card.tts..AUT.name[1].config.object.string.. ' - '
+    if (((((AUT.name[1] or {}).nodes or {})[1] or {}).config or {}).object or {}).string then
+        local str = AUT.name[1].nodes[1].config.object.string
+        if type(str) == 'table' then
+            local new_str = ''
+            for _,vv in pairs(str) do
+                new_str = new_str .. vv .. ' '
+            end
+            str = new_str
+        end
+        card.tts = card.tts..str.. ' - '
     else
         local name_text = ''
         for _, v in ipairs(AUT.name) do
@@ -48,10 +56,13 @@ for _, v in ipairs(AUT.main) do
             search = function(to_search, text_to_merge)
                 if to_search.config and type(to_search.config.text) == 'string' then
                     text_to_merge = to_search.config.text
-                elseif to_search.config and to_search.config.object and to_search.config.object.string then
-                    local str = to_search.config.object.string
+                elseif (((((to_search.nodes or {})[1] or {}).config or {}).object or {}).string) then
+                    local str = to_search.nodes[1].config.object.string
                     if type(str) == 'table' then
-                        text_to_merge = table.concat(str, ' ')
+                        text_to_merge = ''
+                        for _,vv in pairs(str) do
+                            text_to_merge = text_to_merge .. vv .. ' '
+                        end
                     else
                         text_to_merge = str
                     end
@@ -65,6 +76,7 @@ for _, v in ipairs(AUT.main) do
 end
 card.tts = card.tts..desc_text..'- '
 """
+
 match_indent = true
 
 # G.UIDEF.card_h_popup()
@@ -75,10 +87,17 @@ pattern = '''(?<indent>[\t ]*)return \{n=G\.UIT\.ROOT, config = \{align = 'cm', 
 position = 'before'
 line_prepend = '$indent'
 payload = ''' 
--- Badges
+-- ueBadges
 for i, v in ipairs(badges) do
     local badge_name = v.nodes[1].nodes[2].config.object.string
-
+    print(v.nodes[1].nodes[2].config)
+    if type(badge_name) == 'table' then
+        local new_str = ''
+        for _,vv in pairs(badge_name) do
+            new_str = new_str .. vv .. ' '
+        end
+        badge_name = new_str.. '- '
+    end
     card.tts = card.tts..badge_name..' - '
 end
 
