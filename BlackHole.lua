@@ -385,8 +385,10 @@ function BlackHole.read_button(node)
             end
         end
     end
-    local is_play_hand = but_text == localize('b_play_hand') .. ' '
-    local is_discard = but_text == localize('b_discard') .. ' '
+    local loc_play_hand = localize('b_play_hand')
+    local loc_discard = localize('b_discard')
+    local is_play_hand = string.sub(but_text, 1, string.len(loc_play_hand)) == loc_play_hand
+    local is_discard = string.sub(but_text, 1, string.len(loc_discard)) == loc_discard
     if is_play_hand or is_discard then
         local amount = G.GAME.current_round[is_play_hand and 'hands_left' or 'discards_left']
         but_text = but_text .. localize {
