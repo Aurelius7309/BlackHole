@@ -3,8 +3,8 @@
     "name": "Black Hole",
     "prefix": "blh",
     "author": ["Aure"],
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "Screen reader mod for Balatro.",
     "main_file": "BlackHole.lua",
-    "dependencies": [ "Steamodded (>=1.0.0~BETA-0305a)" ]
+    "dependencies": [ "Steamodded (>=1.0.0~BETA-0608a)" ]
 }

@@ -13,16 +13,18 @@ position = "after"
 payload = """
 card.tts = ''
 if AUT.name and type(AUT.name) == 'table' then
-    if (((((AUT.name[1] or {}).nodes or {})[1] or {}).config or {}).object or {}).string then
-        local str = AUT.name[1].nodes[1].config.object.string
-        if type(str) == 'table' then
-            local new_str = ''
-            for _,vv in pairs(str) do
-                new_str = new_str .. vv .. ' '
+    if (((((((AUT.name[1] or {}).nodes or {})[1] or {}).nodes or {})[1] or {}).config or {}).object or {}).string then
+        for _,node in ipairs(AUT.name[1].nodes[1].nodes) do
+            local str = node.config.object.string
+            if type(str) == 'table' then
+                local new_str = ''
+                for _,vv in pairs(str) do
+                    new_str = new_str .. vv .. ' '
+                end
+                str = new_str
             end
-            str = new_str
+            card.tts = card.tts..str.. ' - '
         end
-        card.tts = card.tts..str.. ' - '
     else
         local name_text = ''
         for _, v in ipairs(AUT.name) do
@@ -83,14 +85,14 @@ match_indent = true
 [[patches]]
 [patches.regex]
 target = 'functions/UI_definitions.lua'
-pattern = '''(?<indent>[\t ]*)return \{n=G\.UIT\.ROOT, config = \{align = 'cm', colour = G\.C\.CLEAR\}, nodes=\{\n[\s\S]{8}\{n=G\.UIT\.C'''
+pattern = '''(?<indent>[\t ]*)local ret_val = \{n=G\.UIT\.ROOT, config = \{align = 'cm', colour = G\.C\.CLEAR\}, nodes=\{'''
 position = 'before'
 line_prepend = '$indent'
 payload = ''' 
 -- ueBadges
 for i, v in ipairs(badges) do
     local badge_name = v.nodes[1].nodes[2].config.object.string
-    print(v.nodes[1].nodes[2].config)
+    --print(v.nodes[1].nodes[2])
     if type(badge_name) == 'table' then
         local new_str = ''
         for _,vv in pairs(badge_name) do
