@@ -804,3 +804,40 @@ function BlackHole.run_setup_controller(button)
         end
     end
 end
+
+local soundsToLoad = {
+    "j_dna",
+    "j_invisible",
+    "j_loyalty_card",
+    "j_trading",
+    "default",
+}
+
+BlackHole.joker_sounds = {
+}
+
+for _, s in ipairs(soundsToLoad) do
+    BlackHole.joker_sounds[s] = 
+    SMODS.Sound({
+        key = s,
+        path = s .. ".wav",
+    })
+end
+
+
+function BlackHole.play_joker_notif(card, first) 
+    if not first then return end
+    local sound = BlackHole.joker_sounds[card.config.center.key] or BlackHole.joker_sounds.default
+    if not sound or not sound.key then return sendErrorMessage("Failed to get sound for joker notif", "BlackHole") end
+    G.E_MANAGER:add_event(
+        Event({
+            trigger = 'before',
+            delay = 2,
+            func = function() 
+                play_sound(sound.key)
+                return true
+            end
+        }),
+        "other" -- IDK if I should use this queue but the main queue is busy when I do my thing
+    )
+end

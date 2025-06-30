@@ -1,0 +1,12 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = "function juice_card_until(card, eval_func, first, delay)"
+position = "after"
+payload = """BlackHole.play_joker_notif(card, first)"""
+match_indent = true
